@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard ความคืบหน้าแผนงาน CG ประจำปี 2569 | กฟน.</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --mea-green:#006b3f;--mea-green-d:#004d2e;--mea-green-l:#e6f2ec;
+    --mea-gold:#c9a13b;--mea-gold-d:#a8842a;
+    --ink:#1c2b25;--muted:#5e6f68;--line:#e3eae6;--bg:#f4f7f5;--card:#fff;
+    --ok:#2e9e5b;--warn:#e0a526;--bad:#d9534f;--idle:#9aa6a1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","Sarabun",Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+  header{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 26px;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+  header .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .logo{width:46px;height:46px;border-radius:10px;background:var(--mea-gold);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--mea-green-d);font-size:18px}
+  header h1{font-size:20px;font-weight:700}
+  header .sub{color:#d4e7dd;font-size:13px;margin-top:2px}
+  .asof{margin-left:auto;text-align:right;font-size:12px;color:#cfe3d8}
+  .asof select{margin-top:4px;padding:5px 8px;border-radius:7px;border:none;font-size:13px;background:#fff;color:var(--ink)}
+  .wrap{max-width:1280px;margin:0 auto;padding:22px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .kpi{background:var(--card);border-radius:14px;padding:16px 16px 14px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+  .kpi:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,107,63,.14)}
+  .kpi.active{border-color:var(--mea-green);box-shadow:0 6px 18px rgba(0,107,63,.18)}
+  .kpi .bar{position:absolute;top:0;left:0;width:5px;height:100%}
+  .kpi .name{font-size:13px;color:var(--muted);font-weight:600;min-height:34px}
+  .kpi .num{display:flex;align-items:baseline;gap:6px;margin-top:8px}
+  .kpi .actual{font-size:30px;font-weight:800}
+  .kpi .target{font-size:13px;color:var(--muted)}
+  .kpi .track{height:8px;border-radius:6px;background:#eef2f0;margin-top:10px;overflow:hidden;position:relative}
+  .kpi .fill{height:100%;border-radius:6px}
+  .kpi .tmark{position:absolute;top:-2px;width:2px;height:12px;background:var(--mea-gold-d)}
+  .kpi .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px}
+  .chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;color:#fff}
+  .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:18px}
+  .panel{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.04);padding:18px}
+  .panel h2{font-size:15px;color:var(--mea-green-d);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
+  .panel .desc{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .chartbox{position:relative;height:300px}
+  .chartbox.sm{height:260px}
+  .tablewrap{overflow:auto;max-height:560px;border-radius:10px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+  thead th{position:sticky;top:0;background:var(--mea-green);color:#fff;font-weight:600;padding:10px 12px;text-align:left;z-index:2;font-size:12.5px}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tbody tr:nth-child(even){background:#fafcfb}
+  tbody tr:hover{background:var(--mea-green-l)}
+  td.center{text-align:center;white-space:nowrap}
+  .grp{background:var(--mea-green-l)!important;font-weight:700;color:var(--mea-green-d)}
+  .mini{height:7px;border-radius:5px;background:#eef2f0;overflow:hidden;min-width:90px}
+  .mini i{display:block;height:100%}
+  .stat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .w{font-size:11px;color:var(--muted)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .note{font-size:11.5px;color:var(--muted);margin-top:14px;padding:10px 12px;background:var(--mea-green-l);border-radius:8px;border-left:3px solid var(--mea-gold)}
+  .loading{text-align:center;padding:60px;color:var(--muted)}
+  .err{text-align:center;padding:40px;color:var(--bad);font-size:14px}
+  footer{text-align:center;color:var(--muted);font-size:11.5px;padding:18px}
+  @media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo">MEA</div>
+    <div>
+      <h1>Dashboard ความคืบหน้าแผนงานด้านการกำกับดูแลกิจการที่ดี (CG) ประจำปี 2569</h1>
+      <div class="sub">การไฟฟ้านครหลวง · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) · รองผู้ว่าการยุทธศาสตร์องค์กรและความยั่งยืน</div>
+    </div>
+    <div class="asof">
+      ข้อมูล ณ เดือน<br><select id="monthSel"></select>
+      <div id="updated" style="margin-top:6px;font-size:11px"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" id="app">
+  <div class="loading">⏳ กำลังโหลดข้อมูลจาก data.json ...</div>
+</div>
+
+<footer>จัดทำโดยงานด้าน CG · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) การไฟฟ้านครหลวง — ข้อมูลปรับปรุงผ่าน data.json</footer>
+
+<script>
+const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const C={ok:'#2e9e5b',warn:'#e0a526',bad:'#d9534f',idle:'#9aa6a1'};
+let DATA=null,curMonth=5,curPlan=null,trendChart,compChart;
+
+const APP_HTML=`
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2">
+    <div class="panel">
+      <h2><span class="dot"></span>เป้าหมายสะสม vs ผลการดำเนินงานจริงสะสม (รายเดือน)</h2>
+      <div class="desc" id="trendDesc"></div>
+      <div class="chartbox"><canvas id="trend"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2><span class="dot"></span>เปรียบเทียบความคืบหน้า 4 แผน ณ เดือนปัจจุบัน</h2>
+      <div class="desc">แท่งทอง = เป้าหมายสะสม · แท่งเขียว = ผลจริงสะสม</div>
+      <div class="chartbox sm"><canvas id="compare"></canvas></div>
+      <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--mea-green)"></i> ผลจริง</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2><span class="dot"></span>ความคืบหน้ารายกิจกรรม — <span id="planTitle"></span></h2>
+    <div class="desc" id="planMeta"></div>
+    <div class="tablewrap">
+      <table id="actTbl"><thead><tr>
+        <th style="width:48px">ลำดับ</th><th>กิจกรรม</th><th style="width:120px">หน่วยงาน</th>
+        <th class="center" style="width:60px">น้ำหนัก</th><th class="center" style="width:80px">เป้าหมาย<br>เดือนนี้ (%)</th>
+        <th class="center" style="width:80px">ผลจริง (%)</th><th style="width:150px">สถานะ</th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--ok)"></i> ตามแผน/เกินเป้า</span>
+      <span><i style="background:var(--warn)"></i> ใกล้เป้า (ห่าง ≤15%)</span>
+      <span><i style="background:var(--bad)"></i> ต่ำกว่าเป้า (ห่าง &gt;15%)</span>
+      <span><i style="background:var(--idle)"></i> ยังไม่ถึงกำหนด</span>
+    </div>
+    <div class="note">ข้อมูลแสดงผลอย่างเดียว (read-only) — การปรับปรุงผลการดำเนินงานทำผ่านไฟล์ Excel บน Microsoft 365 ของแต่ละฝ่าย แล้วแปลงเป็น data.json เผยแพร่ผ่าน GitHub Pages · การจัดการความเสี่ยง: หากระดับความเสี่ยงหลังการควบคุมอยู่ในระดับสูง/สูงมาก ให้ดำเนินการจัดการความเสี่ยงเพิ่มเติม</div>
+  </div>`;
+
+function planCumActual(p,mi){
+  const acts=p.acts.filter(a=>a.id);
+  const tw=acts.reduce((s,a)=>s+a.w,0);
+  let v=0;acts.forEach(a=>{v+=a.w*((a.a&&a.a[mi])||0)/100;});
+  return tw?+(v/tw*100).toFixed(1):0;
+}
+function statusOf(t,a){if(!t)return'idle';if(a>=t)return'ok';if(t-a<=15)return'warn';return'bad';}
+
+function renderKpis(){
+  const box=document.getElementById('kpis');box.innerHTML='';
+  Object.entries(DATA.plans).forEach(([k,p])=>{
+    const tgt=p.cum[curMonth],act=planCumActual(p,curMonth),st=statusOf(tgt,act);
+    const card=document.createElement('div');card.className='kpi'+(k===curPlan?' active':'');
+    card.innerHTML=`<div class="bar" style="background:${C[st]}"></div>
+      <div class="name">${p.full||p.name}</div>
+      <div class="num"><span class="actual">${act}%</span><span class="target">/ เป้า ${tgt}%</span>
+        <span class="chip" style="background:${C[st]};margin-left:auto">${st==='ok'?'ตามแผน':st==='warn'?'เฝ้าระวัง':st==='bad'?'ต่ำกว่าเป้า':'รอบันทึก'}</span></div>
+      <div class="track"><div class="fill" style="width:${Math.min(act,100)}%;background:${C[st]}"></div>
+        <div class="tmark" style="left:${Math.min(tgt,100)}%"></div></div>
+      <div class="meta"><span>กิจกรรม ${p.acts.filter(a=>a.id).length} รายการ</span><span>งบ ${p.budget}</span></div>`;
+    card.onclick=()=>{curPlan=k;renderAll();};
+    box.appendChild(card);
+  });
+}
+function renderTrend(){
+  const p=DATA.plans[curPlan];
+  const actCum=MONTHS.map((_,i)=>i<=curMonth?planCumActual(p,i):null);
+  document.getElementById('trendDesc').textContent=(p.full||p.name)+" — เส้นทอง=เป้าหมายสะสม, เส้นเขียว=ผลจริงสะสม (ถึงเดือน "+MONTHS[curMonth]+")";
+  const data={labels:MONTHS,datasets:[
+    {label:'เป้าหมายสะสม (%)',data:p.cum,borderColor:'#c9a13b',backgroundColor:'rgba(201,161,59,.12)',borderWidth:2,tension:.3,fill:true,pointRadius:3},
+    {label:'ผลจริงสะสม (%)',data:actCum,borderColor:'#006b3f',backgroundColor:'rgba(0,107,63,.10)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,spanGaps:false}]};
+  if(trendChart){trendChart.data=data;trendChart.update();}
+  else trendChart=new Chart(document.getElementById('trend'),{type:'line',data,options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
+}
+function renderCompare(){
+  const labels=Object.values(DATA.plans).map(p=>p.name);
+  const tgt=Object.values(DATA.plans).map(p=>p.cum[curMonth]);
+  const act=Object.values(DATA.plans).map(p=>planCumActual(p,curMonth));
+  const data={labels,datasets:[
+    {label:'เป้าหมาย',data:tgt,backgroundColor:'#c9a13b',borderRadius:5},
+    {label:'ผลจริง',data:act,backgroundColor:'#006b3f',borderRadius:5}]};
+  if(compChart){compChart.data=data;compChart.update();}
+  else compChart=new Chart(document.getElementById('compare'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false}}}});
+}
+function renderTable(){
+  const p=DATA.plans[curPlan];
+  document.getElementById('planTitle').textContent=p.full||p.name;
+  document.getElementById('planMeta').innerHTML=`ตัวชี้วัด: ${p.kpi||'-'} · งบประมาณ: ${p.budget} · ผู้รับผิดชอบหลัก: ฝบส.`;
+  const tb=document.querySelector('#actTbl tbody');tb.innerHTML='';
+  p.acts.forEach(a=>{
+    if(a.grp){const tr=document.createElement('tr');tr.innerHTML=`<td class="grp" colspan="7">หมวด ${a.grp}</td>`;tb.appendChild(tr);return;}
+    const t=a.t[curMonth],av=(a.a&&a.a[curMonth])||0,st=statusOf(t,av);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="center">${a.id}</td><td>${a.name}</td><td><span class="w">${a.unit}</span></td>
+      <td class="center">${a.w}</td><td class="center">${t}%</td><td class="center">${av}%</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
+      <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
+    tb.appendChild(tr);
+  });
+}
+function renderAll(){renderKpis();renderTrend();renderCompare();renderTable();}
+
+function boot(){
+  document.getElementById('app').innerHTML=APP_HTML;
+  const ms=document.getElementById('monthSel');
+  MONTHS.forEach((m,i)=>{const o=document.createElement('option');o.value=i;o.textContent=m+" 2569";ms.appendChild(o);});
+  ms.value=curMonth;ms.onchange=e=>{curMonth=+e.target.value;renderAll();};
+  if(DATA.updated)document.getElementById('updated').textContent="อัปเดต: "+DATA.updated;
+  curPlan=Object.keys(DATA.plans)[0];
+  renderAll();
+}
+
+fetch('data.json',{cache:'no-store'})
+  .then(r=>{if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(d=>{DATA=d;boot();})
+  .catch(e=>{document.getElementById('app').innerHTML=
+    `<div class="err">ไม่สามารถโหลด data.json ได้ (${e.message})<br><br>
+     หากเปิดไฟล์ตรงๆ จากเครื่อง เบราว์เซอร์จะบล็อกการอ่านไฟล์ (CORS)<br>
+     ให้รันผ่านเซิร์ฟเวอร์: <code>python -m http.server</code> แล้วเปิด http://localhost:8000<br>
+     หรือ deploy ขึ้น GitHub Pages ซึ่งจะทำงานได้ปกติ</div>`;});
+</script>
+</body>
+</html>
