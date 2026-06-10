@@ -59,6 +59,30 @@
   .legend span{display:inline-flex;align-items:center;gap:5px}
   .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
   .note{font-size:11.5px;color:var(--muted);margin-top:14px;padding:10px 12px;background:var(--mea-green-l);border-radius:8px;border-left:3px solid var(--mea-gold)}
+  .actrow{cursor:pointer}
+  .actrow .more{font-size:11px;color:var(--mea-gold-d);font-weight:600;white-space:nowrap;opacity:.75}
+  .actrow:hover .more{opacity:1;text-decoration:underline}
+  .modal{display:none;position:fixed;inset:0;background:rgba(20,35,28,.55);z-index:100;align-items:center;justify-content:center;padding:20px}
+  .modal.show{display:flex}
+  .mbox{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:86vh;overflow:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .mclose{position:absolute;top:14px;right:14px;border:none;background:var(--mea-green-l);color:var(--mea-green-d);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;z-index:2}
+  .mclose:hover{background:var(--mea-green);color:#fff}
+  .mhead{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 24px 18px;border-radius:16px 16px 0 0}
+  .mtag{font-size:12px;font-weight:700;color:var(--mea-gold);letter-spacing:.5px}
+  .mhead h3{font-size:17px;margin:6px 0 8px;line-height:1.4}
+  .msub{font-size:12.5px;color:#d4e7dd}
+  .mtblwrap{padding:18px 24px}
+  .mtbl{width:100%;border-collapse:collapse;font-size:13px}
+  .mtbl thead th{background:var(--mea-green-l);color:var(--mea-green-d);padding:9px 10px;text-align:left;font-size:12px;border-bottom:2px solid var(--mea-green)}
+  .mtbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .mtbl .mcell{font-weight:700;color:var(--mea-green-d);white-space:nowrap}
+  .mtbl .ncell{color:var(--ink);line-height:1.5}
+  .mtbl .ncell .empty{color:#b3bfba;font-style:italic;font-size:12px}
+  .mtbl .curm{background:#f7efd8}
+  .mtbl .curm .mcell{color:var(--mea-gold-d)}
+  .mtbl .future{opacity:.45}
+  .dotst{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .mfoot{font-size:11.5px;color:var(--muted);padding:4px 24px 22px;line-height:1.6}
   .loading{text-align:center;padding:60px;color:var(--muted)}
   .err{text-align:center;padding:40px;color:var(--bad);font-size:14px}
   footer{text-align:center;color:var(--muted);font-size:11.5px;padding:18px}
@@ -174,18 +198,54 @@ function renderTable(){
   document.getElementById('planTitle').textContent=p.full||p.name;
   document.getElementById('planMeta').innerHTML=`ตัวชี้วัด: ${p.kpi||'-'} · งบประมาณ: ${p.budget} · ผู้รับผิดชอบหลัก: ฝบส.`;
   const tb=document.querySelector('#actTbl tbody');tb.innerHTML='';
-  p.acts.forEach(a=>{
+  p.acts.forEach((a,idx)=>{
     if(a.grp){const tr=document.createElement('tr');tr.innerHTML=`<td class="grp" colspan="7">หมวด ${a.grp}</td>`;tb.appendChild(tr);return;}
     const t=a.t[curMonth],av=(a.a&&a.a[curMonth])||0,st=statusOf(t,av);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="center">${a.id}</td><td>${a.name}</td><td><span class="w">${a.unit}</span></td>
+    tr.className='actrow';tr.title='คลิกเพื่อดูสิ่งที่ดำเนินการรายเดือน';
+    tr.innerHTML=`<td class="center">${a.id}</td><td>${a.name} <span class="more">▸ รายละเอียด</span></td><td><span class="w">${a.unit}</span></td>
       <td class="center">${a.w}</td><td class="center">${t}%</td><td class="center">${av}%</td>
       <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
       <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
+    tr.onclick=()=>openModal(curPlan,a.aid);
     tb.appendChild(tr);
   });
 }
+
+function openModal(planKey,aid){
+  const p=DATA.plans[planKey];
+  const a=p.acts.find(x=>x.aid===aid);
+  if(!a)return;
+  const m=document.getElementById('modal');
+  const body=document.getElementById('modalBody');
+  // สร้างรายการรายเดือน: เดือน | เป้าหมาย | ผลจริง | สิ่งที่ดำเนินการ
+  let rows='';
+  for(let i=0;i<12;i++){
+    const t=a.t[i],av=(a.a&&a.a[i])||0,st=statusOf(t,av);
+    const note=(a.notes&&a.notes[i])||'';
+    const onlyFuture=i>curMonth;
+    rows+=`<tr class="${i===curMonth?'curm':''} ${onlyFuture?'future':''}">
+      <td class="mcell">${MONTHS[i]}</td>
+      <td class="center">${t}%</td>
+      <td class="center"><span class="dotst" style="background:${C[st]}"></span>${av}%</td>
+      <td class="ncell">${note?note.replace(/</g,'&lt;'):'<span class="empty">— ยังไม่มีบันทึก —</span>'}</td></tr>`;
+  }
+  body.innerHTML=`
+    <div class="mhead">
+      <div class="mtag">${p.name} · ${a.aid}</div>
+      <h3>${a.id} ${a.name}</h3>
+      <div class="msub">ผู้รับผิดชอบ: <b>${a.unit}</b> · ค่าถ่วงน้ำหนัก: <b>${a.w}</b></div>
+    </div>
+    <div class="mtblwrap"><table class="mtbl">
+      <thead><tr><th>เดือน</th><th class="center">เป้าหมาย</th><th class="center">ผลจริง</th><th>สิ่งที่ดำเนินการ</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div class="mfoot">แถวไฮไลต์ = เดือนปัจจุบัน (${MONTHS[curMonth]}) · เดือนสีจาง = ยังไม่ถึงกำหนด · ข้อมูล "สิ่งที่ดำเนินการ" บันทึกผ่าน SharePoint รายเดือน</div>`;
+  m.classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
 function renderAll(){renderKpis();renderTrend();renderCompare();renderTable();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function boot(){
   document.getElementById('app').innerHTML=APP_HTML;
@@ -206,5 +266,12 @@ fetch('data.json',{cache:'no-store'})
      ให้รันผ่านเซิร์ฟเวอร์: <code>python -m http.server</code> แล้วเปิด http://localhost:8000<br>
      หรือ deploy ขึ้น GitHub Pages ซึ่งจะทำงานได้ปกติ</div>`;});
 </script>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+  <div class="mbox">
+    <button class="mclose" onclick="closeModal()">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 </body>
 </html>
