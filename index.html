@@ -152,10 +152,14 @@ const APP_HTML=`
 function planCumActual(p,mi){
   const acts=p.acts.filter(a=>a.id);
   const tw=acts.reduce((s,a)=>s+a.w,0);
-  let v=0;acts.forEach(a=>{v+=a.w*((a.a&&a.a[mi])||0)/100;});
+  let v=0;acts.forEach(a=>{v+=a.w*actualAt(a,mi)/100;});
   return tw?+(v/tw*100).toFixed(1):0;
 }
 function statusOf(t,a){if(!t)return'idle';if(a>=t)return'ok';if(t-a<=15)return'warn';return'bad';}
+// ถ้ากิจกรรมเคยถึง 100% (งานเสร็จ) ในเดือนก่อนหน้า ให้ถือว่าเสร็จต่อเนื่อง
+function doneBefore(a,i){if(!a.a)return false;for(let j=0;j<i;j++){if((+a.a[j]||0)>=100)return true;}return false;}
+// ผลจริงที่ใช้แสดงผล: เดือนที่ว่าง(0) หลังกิจกรรมเสร็จแล้ว = 100%
+function actualAt(a,i){const v=(a.a&&+a.a[i])||0;return (v===0&&doneBefore(a,i))?100:v;}
 
 function renderKpis(){
   const box=document.getElementById('kpis');box.innerHTML='';
@@ -200,7 +204,7 @@ function renderTable(){
   const tb=document.querySelector('#actTbl tbody');tb.innerHTML='';
   p.acts.forEach((a,idx)=>{
     if(a.grp){const tr=document.createElement('tr');tr.innerHTML=`<td class="grp" colspan="7">หมวด ${a.grp}</td>`;tb.appendChild(tr);return;}
-    const t=a.t[curMonth],av=(a.a&&a.a[curMonth])||0,st=statusOf(t,av);
+    const t=a.t[curMonth],av=actualAt(a,curMonth),st=statusOf(t,av);
     const tr=document.createElement('tr');
     tr.className='actrow';tr.title='คลิกเพื่อดูสิ่งที่ดำเนินการรายเดือน';
     tr.innerHTML=`<td class="center">${a.id}</td><td>${a.name} <span class="more">▸ รายละเอียด</span></td><td><span class="w">${a.unit}</span></td>
@@ -221,14 +225,16 @@ function openModal(planKey,aid){
   // สร้างรายการรายเดือน: เดือน | เป้าหมาย | ผลจริง | สิ่งที่ดำเนินการ
   let rows='';
   for(let i=0;i<12;i++){
-    const t=a.t[i],av=(a.a&&a.a[i])||0,st=statusOf(t,av);
+    const raw=(a.a&&+a.a[i])||0,av=actualAt(a,i),st=statusOf(a.t[i],av);
+    const carried=(raw===0&&av===100);
     const note=(a.notes&&a.notes[i])||'';
     const onlyFuture=i>curMonth;
+    const noteHtml=note?note.replace(/</g,'&lt;'):(carried?'<span style="color:var(--ok);font-weight:600">✓ ดำเนินการแล้วเสร็จ</span>':'<span class="empty">— ยังไม่มีบันทึก —</span>');
     rows+=`<tr class="${i===curMonth?'curm':''} ${onlyFuture?'future':''}">
       <td class="mcell">${MONTHS[i]}</td>
-      <td class="center">${t}%</td>
+      <td class="center">${a.t[i]}%</td>
       <td class="center"><span class="dotst" style="background:${C[st]}"></span>${av}%</td>
-      <td class="ncell">${note?note.replace(/</g,'&lt;'):'<span class="empty">— ยังไม่มีบันทึก —</span>'}</td></tr>`;
+      <td class="ncell">${noteHtml}</td></tr>`;
   }
   body.innerHTML=`
     <div class="mhead">
