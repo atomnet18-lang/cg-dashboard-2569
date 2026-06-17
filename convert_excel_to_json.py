@@ -104,8 +104,17 @@ def is_template_sheet(ws):
 def parse_template_sheet(ws, hdr_row):
     """อ่านชีต template: เป้าหมายดึงจาก comment ในเซลล์เดือน, ผลจริงดึงจากค่าในเซลล์"""
     meta = parse_meta(ws)
-    # คอลัมน์: A ลำดับ, B กิจกรรม, C หน่วยงาน, D น้ำหนัก, E-P เดือน(12), Q ปัญหา
+    # คอลัมน์: A ลำดับ, B กิจกรรม, C หน่วยงาน, D น้ำหนัก, E-P เดือน(12), Q ปัญหา, R-AC สิ่งที่ดำเนินการ(12)
     month_cols = list(range(5, 17))
+    # หาคอลัมน์ "สิ่งที่ดำเนินการ <เดือน>" จากแถว header -> map เดือน:คอลัมน์
+    note_cols = [None] * 12
+    for c in range(1, ws.max_column + 1):
+        h = clean(ws.cell(row=hdr_row, column=c).value)
+        if h.startswith("สิ่งที่ดำเนินการ"):
+            for i, m in enumerate(MONTHS):
+                if m in h:
+                    note_cols[i] = c
+                    break
     acts = []
     cum = [0]*12
     r = hdr_row + 1
@@ -135,8 +144,9 @@ def parse_template_sheet(ws, hdr_row):
                 if m:
                     t_val = float(m.group(1))
             targets.append(t_val)
+        notes = [clean(ws.cell(row=r, column=nc).value) if nc else "" for nc in note_cols]
         acts.append({"id": id_v, "name": name_v, "unit": unit, "w": w,
-                     "t": targets, "a": actuals})
+                     "t": targets, "a": actuals, "notes": notes})
         r += 1
     # คำนวณเป้าหมายสะสมถ่วงน้ำหนักจาก targets ของกิจกรรม
     real = [a for a in acts if a.get("id")]
@@ -271,6 +281,16 @@ def main():
         parsed["name"] = info["name"]
         plans[info["key"]] = parsed
         seen_keys.add(info["key"])
+
+    # สร้าง aid ไม่ซ้ำต่อแผน (ใช้เป็น key เปิดหน้ารายละเอียดให้ถูกกิจกรรม)
+    PREFIX = {"ita": "ITA", "moral": "MORAL", "fraud": "FRAUD", "nine": "NINE"}
+    for key, p in plans.items():
+        n = 0
+        pfx = PREFIX.get(key, key.upper())
+        for a in p["acts"]:
+            if a.get("id"):
+                n += 1
+                a["aid"] = f"{pfx}-{n:02d}"
 
     out = {
         "updated": "",   # เติมวันที่อัปเดตได้ภายหลัง

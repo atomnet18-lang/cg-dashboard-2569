@@ -238,7 +238,7 @@ function openModal(planKey,aid){
   }
   body.innerHTML=`
     <div class="mhead">
-      <div class="mtag">${p.name} · ${a.aid}</div>
+      <div class="mtag">${p.name} · ${a.aid||a.id}</div>
       <h3>${a.id} ${a.name}</h3>
       <div class="msub">ผู้รับผิดชอบ: <b>${a.unit}</b> · ค่าถ่วงน้ำหนัก: <b>${a.w}</b></div>
     </div>
