@@ -160,6 +160,20 @@ function statusOf(t,a){if(!t)return'idle';if(a>=t)return'ok';if(t-a<=15)return'w
 function doneBefore(a,i){if(!a.a)return false;for(let j=0;j<i;j++){if((+a.a[j]||0)>=100)return true;}return false;}
 // ผลจริงที่ใช้แสดงผล: เดือนที่ว่าง(0) หลังกิจกรรมเสร็จแล้ว = 100%
 function actualAt(a,i){const v=(a.a&&+a.a[i])||0;return (v===0&&doneBefore(a,i))?100:v;}
+// แผน 9 หมวด: รวมกิจกรรมย่อยเป็น "หมวด" แล้วคำนวณเป้าหมาย/ผลจริงแบบถ่วงน้ำหนักรายเดือน
+function buildCategories(p){
+  const cats=[];let cur=null;
+  p.acts.forEach(a=>{
+    if(a.grp){const gs=String(a.grp).trim();const mm=gs.match(/^(\d+)\s*[·:.\-]?\s*(.*)$/);cur={num:mm?mm[1]:'',name:mm?mm[2]:gs,acts:[]};cats.push(cur);}
+    else if(a.id&&cur){cur.acts.push(a);}
+  });
+  return cats;
+}
+function catCum(cat,which,mi){
+  const tw=cat.acts.reduce((s,a)=>s+a.w,0);
+  let v=0;cat.acts.forEach(a=>{const val=which==='t'?(a.t[mi]||0):actualAt(a,mi);v+=a.w*val/100;});
+  return tw?+(v/tw*100).toFixed(1):0;
+}
 
 function renderKpis(){
   const box=document.getElementById('kpis');box.innerHTML='';
@@ -202,6 +216,22 @@ function renderTable(){
   document.getElementById('planTitle').textContent=p.full||p.name;
   document.getElementById('planMeta').innerHTML=`ตัวชี้วัด: ${p.kpi||'-'} · งบประมาณ: ${p.budget} · ผู้รับผิดชอบหลัก: ฝบส.`;
   const tb=document.querySelector('#actTbl tbody');tb.innerHTML='';
+  const hasGroups=p.acts.some(a=>a.grp);
+  if(hasGroups){
+    buildCategories(p).forEach((cat,ci)=>{
+      const t=catCum(cat,'t',curMonth),av=catCum(cat,'a',curMonth),st=statusOf(t,av);
+      const wsum=cat.acts.reduce((s,a)=>s+a.w,0);
+      const tr=document.createElement('tr');
+      tr.className='actrow';tr.title='คลิกเพื่อดูเป้าหมาย/ผลจริงรายเดือนของหมวดนี้';
+      tr.innerHTML=`<td class="center">${cat.num}</td><td><b>หมวด ${cat.num}</b> ${cat.name} <span class="more">▸ รายละเอียด</span></td><td><span class="w">${cat.acts.length} กิจกรรม</span></td>
+        <td class="center">${wsum}</td><td class="center">${t}%</td><td class="center">${av}%</td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
+        <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
+      tr.onclick=()=>openCatModal(curPlan,ci);
+      tb.appendChild(tr);
+    });
+    return;
+  }
   p.acts.forEach((a,idx)=>{
     if(a.grp){const tr=document.createElement('tr');tr.innerHTML=`<td class="grp" colspan="7">หมวด ${a.grp}</td>`;tb.appendChild(tr);return;}
     const t=a.t[curMonth],av=actualAt(a,curMonth),st=statusOf(t,av);
@@ -247,6 +277,35 @@ function openModal(planKey,aid){
       <tbody>${rows}</tbody>
     </table></div>
     <div class="mfoot">แถวไฮไลต์ = เดือนปัจจุบัน (${MONTHS[curMonth]}) · เดือนสีจาง = ยังไม่ถึงกำหนด · ข้อมูล "สิ่งที่ดำเนินการ" บันทึกผ่าน SharePoint รายเดือน</div>`;
+  m.classList.add('show');
+}
+function openCatModal(planKey,ci){
+  const p=DATA.plans[planKey];
+  const cat=buildCategories(p)[ci];
+  if(!cat)return;
+  const m=document.getElementById('modal');
+  const body=document.getElementById('modalBody');
+  const wsum=cat.acts.reduce((s,a)=>s+a.w,0);
+  let rows='';
+  for(let i=0;i<12;i++){
+    const t=catCum(cat,'t',i),av=catCum(cat,'a',i),st=statusOf(t,av);
+    const onlyFuture=i>curMonth;
+    rows+=`<tr class="${i===curMonth?'curm':''} ${onlyFuture?'future':''}">
+      <td class="mcell">${MONTHS[i]}</td>
+      <td class="center">${t}%</td>
+      <td class="center"><span class="dotst" style="background:${C[st]}"></span>${av}%</td></tr>`;
+  }
+  body.innerHTML=`
+    <div class="mhead">
+      <div class="mtag">${p.name} · หมวด ${cat.num}</div>
+      <h3>หมวด ${cat.num} ${cat.name}</h3>
+      <div class="msub">รวม <b>${cat.acts.length}</b> กิจกรรม · ค่าถ่วงน้ำหนักรวม: <b>${wsum}</b> · คำนวณ % แบบถ่วงน้ำหนักรายเดือน</div>
+    </div>
+    <div class="mtblwrap"><table class="mtbl">
+      <thead><tr><th>เดือน</th><th class="center">เป้าหมายสะสม</th><th class="center">ผลจริงสะสม</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+    <div class="mfoot">แถวไฮไลต์ = เดือนปัจจุบัน (${MONTHS[curMonth]}) · เดือนสีจาง = ยังไม่ถึงกำหนด · ตัวเลขเป็น % สะสมถ่วงน้ำหนักของกิจกรรมในหมวด</div>`;
   m.classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
