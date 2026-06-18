@@ -16,7 +16,7 @@
   body{font-family:"Segoe UI","Sarabun",Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
   header{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 26px;box-shadow:0 2px 12px rgba(0,0,0,.12)}
   header .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-  .logo{width:46px;height:46px;border-radius:10px;background:var(--mea-gold);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--mea-green-d);font-size:18px}
+  .logo{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#fff;display:block;flex:none}
   header h1{font-size:20px;font-weight:700}
   header .sub{color:#d4e7dd;font-size:13px;margin-top:2px}
   .asof{margin-left:auto;text-align:right;font-size:12px;color:#cfe3d8}
@@ -92,9 +92,9 @@
 <body>
 <header>
   <div class="top">
-    <div class="logo">MEA</div>
+    <img class="logo" src="logo.png" alt="ตราสัญลักษณ์การไฟฟ้านครหลวง">
     <div>
-      <h1>Dashboard ความคืบหน้าแผนงานด้านการกำกับดูแลกิจการที่ดี (CG) ประจำปี 2569</h1>
+      <h1>แผนงานด้านการกำกับดูแลกิจการที่ดี (CG) ประจำปี 2569</h1>
       <div class="sub">การไฟฟ้านครหลวง · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) · รองผู้ว่าการยุทธศาสตร์องค์กรและความยั่งยืน</div>
     </div>
     <div class="asof">
@@ -135,7 +135,7 @@ const APP_HTML=`
     <div class="desc" id="planMeta"></div>
     <div class="tablewrap">
       <table id="actTbl"><thead><tr>
-        <th style="width:48px">ลำดับ</th><th>กิจกรรม</th><th style="width:120px">หน่วยงาน</th>
+        <th style="width:48px">ลำดับ</th><th>กิจกรรม</th><th id="unitCol" style="width:120px">หน่วยงาน</th>
         <th class="center" style="width:60px">น้ำหนัก</th><th class="center" style="width:80px">เป้าหมาย<br>เดือนนี้ (%)</th>
         <th class="center" style="width:80px">ผลจริง (%)</th><th style="width:150px">สถานะ</th>
       </tr></thead><tbody></tbody></table>
@@ -217,13 +217,14 @@ function renderTable(){
   document.getElementById('planMeta').innerHTML=`ตัวชี้วัด: ${p.kpi||'-'} · งบประมาณ: ${p.budget} · ผู้รับผิดชอบหลัก: ฝบส.`;
   const tb=document.querySelector('#actTbl tbody');tb.innerHTML='';
   const hasGroups=p.acts.some(a=>a.grp);
+  const uc=document.getElementById('unitCol');if(uc)uc.style.display=hasGroups?'none':'';
   if(hasGroups){
     buildCategories(p).forEach((cat,ci)=>{
       const t=catCum(cat,'t',curMonth),av=catCum(cat,'a',curMonth),st=statusOf(t,av);
       const wsum=cat.acts.reduce((s,a)=>s+a.w,0);
       const tr=document.createElement('tr');
       tr.className='actrow';tr.title='คลิกเพื่อดูเป้าหมาย/ผลจริงรายเดือนของหมวดนี้';
-      tr.innerHTML=`<td class="center">${cat.num}</td><td><b>หมวด ${cat.num}</b> ${cat.name} <span class="more">▸ รายละเอียด</span></td><td><span class="w">${cat.acts.length} กิจกรรม</span></td>
+      tr.innerHTML=`<td class="center">${cat.num}</td><td><b>หมวด ${cat.num}</b> ${cat.name} <span class="more">▸ รายละเอียด</span></td>
         <td class="center">${wsum}</td><td class="center">${t}%</td><td class="center">${av}%</td>
         <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
         <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
