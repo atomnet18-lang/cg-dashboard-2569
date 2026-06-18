@@ -186,7 +186,7 @@ function renderKpis(){
         <span class="chip" style="background:${C[st]};margin-left:auto">${st==='ok'?'ตามแผน':st==='warn'?'เฝ้าระวัง':st==='bad'?'ต่ำกว่าเป้า':'รอบันทึก'}</span></div>
       <div class="track"><div class="fill" style="width:${Math.min(act,100)}%;background:${C[st]}"></div>
         <div class="tmark" style="left:${Math.min(tgt,100)}%"></div></div>
-      <div class="meta"><span>กิจกรรม ${p.acts.filter(a=>a.id).length} รายการ</span><span>งบ ${p.budget}</span></div>`;
+      <div class="meta"><span>${p.acts.some(a=>a.grp)?('จำนวน '+p.acts.filter(a=>a.grp).length+' หมวด'):('กิจกรรม '+p.acts.filter(a=>a.id).length+' รายการ')}</span><span> ${p.budget}</span></div>`;
     card.onclick=()=>{curPlan=k;renderAll();};
     box.appendChild(card);
   });
