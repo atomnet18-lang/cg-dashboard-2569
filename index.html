@@ -83,6 +83,15 @@
   .mtbl .future{opacity:.45}
   .dotst{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
   .mfoot{font-size:11.5px;color:var(--muted);padding:4px 24px 22px;line-height:1.6}
+  .latelist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0;padding:0}
+  .latelist li{padding:9px 12px;border-radius:8px;border-left:4px solid;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+  .latelist li.lt-warn{border-color:var(--warn);background:#fdf6e9}
+  .latelist li.lt-bad{border-color:var(--bad);background:#fbeceb}
+  .lt-name{font-weight:700;font-size:13px;color:var(--ink)}
+  .lt-sub{color:var(--muted);font-weight:400;font-size:11px}
+  .lt-meta{font-size:12px;color:var(--muted);white-space:nowrap}
+  .lt-meta b{color:var(--bad)}
+  .lateempty{padding:14px;text-align:center;color:var(--ok);font-size:13px;background:var(--mea-green-l);border-radius:8px;font-weight:600}
   .loading{text-align:center;padding:60px;color:var(--muted)}
   .err{text-align:center;padding:40px;color:var(--bad);font-size:14px}
   footer{text-align:center;color:var(--muted);font-size:11.5px;padding:18px}
@@ -129,6 +138,11 @@ const APP_HTML=`
       <div class="chartbox sm"><canvas id="compare"></canvas></div>
       <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--mea-green)"></i> ผลจริง</span></div>
     </div>
+  </div>
+  <div class="panel" id="latePanel">
+    <h2><span class="dot"></span>⚠ กิจกรรมย่อยที่ล่าช้ากว่าแผน</h2>
+    <div class="desc" id="lateDesc"></div>
+    <div id="lateBody"></div>
   </div>
   <div class="panel">
     <h2><span class="dot"></span>ความคืบหน้ารายกิจกรรม — <span id="planTitle"></span></h2>
@@ -310,7 +324,28 @@ function openCatModal(planKey,ci){
   m.classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
-function renderAll(){renderKpis();renderTrend();renderCompare();renderTable();}
+function renderLate(){
+  const el=document.getElementById('lateBody');if(!el)return;
+  const p=DATA.plans[curPlan];
+  const cats=buildCategories(p);
+  const catOf=a=>{for(const c of cats){if(c.acts.indexOf(a)>=0)return c;}return null;};
+  const list=[];
+  p.acts.forEach(a=>{
+    if(!a.id)return;
+    const t=a.t[curMonth],av=actualAt(a,curMonth),st=statusOf(t,av);
+    if(st==='warn'||st==='bad')list.push({a,t,av,gap:+(t-av).toFixed(1),st,cat:catOf(a)});
+  });
+  list.sort((x,y)=>y.gap-x.gap);
+  document.getElementById('lateDesc').textContent=`กิจกรรมที่ผลจริงสะสมต่ำกว่าเป้าหมาย ณ เดือน ${MONTHS[curMonth]} 2569 (เรียงจากล่าช้ามากสุด)`;
+  if(!list.length){el.innerHTML=`<div class="lateempty">✓ ไม่มีกิจกรรมที่ล่าช้ากว่าแผน ณ เดือน ${MONTHS[curMonth]} 2569</div>`;return;}
+  let h='<ul class="latelist">';
+  for(const it of list){
+    const ctx=it.cat?`หมวด ${it.cat.num}`:(it.a.aid||'');
+    h+=`<li class="lt-${it.st}"><span class="lt-name">${it.a.name} <span class="lt-sub">(${ctx})</span></span><span class="lt-meta">เป้า ${it.t}% · ทำได้ ${it.av}% · <b>ต่ำกว่าเป้า ${it.gap} จุด</b></span></li>`;
+  }
+  el.innerHTML=h+'</ul>';
+}
+function renderAll(){renderKpis();renderTrend();renderCompare();renderLate();renderTable();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function boot(){
