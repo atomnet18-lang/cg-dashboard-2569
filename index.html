@@ -122,6 +122,22 @@
 <script>
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const C={ok:'#2e9e5b',warn:'#e0a526',bad:'#d9534f',idle:'#9aa6a1'};
+// ปลั๊กอินจุดกระพริบ (pulse) ที่จุดเดือนปัจจุบัน บนกราฟเส้นเป้าหมาย/ผลจริง
+const pulsePlugin={id:'pulse',afterDatasetsDraw(chart){
+  if(chart.canvas.id!=='trend'||typeof curMonth!=='number')return;
+  const ctx=chart.ctx,phase=(Date.now()%1300)/1300,cols=['#c9a13b','#006b3f'];
+  [0,1].forEach(di=>{
+    const meta=chart.getDatasetMeta(di),pt=meta&&meta.data&&meta.data[curMonth];
+    if(!pt||isNaN(pt.x)||isNaN(pt.y))return;
+    ctx.save();
+    ctx.beginPath();ctx.arc(pt.x,pt.y,5+phase*13,0,Math.PI*2);
+    ctx.strokeStyle=cols[di];ctx.globalAlpha=1-phase;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.globalAlpha=1;ctx.beginPath();ctx.arc(pt.x,pt.y,4.5,0,Math.PI*2);
+    ctx.fillStyle=cols[di];ctx.fill();
+    ctx.beginPath();ctx.arc(pt.x,pt.y,4.5,0,Math.PI*2);ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.restore();
+  });
+}};
 let DATA=null,curMonth=5,curPlan=null,trendChart,compChart;
 
 const APP_HTML=`
@@ -213,7 +229,10 @@ function renderTrend(){
     {label:'เป้าหมายสะสม (%)',data:p.cum,borderColor:'#c9a13b',backgroundColor:'rgba(201,161,59,.12)',borderWidth:2,tension:.3,fill:true,pointRadius:3},
     {label:'ผลจริงสะสม (%)',data:actCum,borderColor:'#006b3f',backgroundColor:'rgba(0,107,63,.10)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,spanGaps:false}]};
   if(trendChart){trendChart.data=data;trendChart.update();}
-  else trendChart=new Chart(document.getElementById('trend'),{type:'line',data,options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
+  else{
+    trendChart=new Chart(document.getElementById('trend'),{type:'line',data,plugins:[pulsePlugin],options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
+    if(!window._pulseRAF){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}setTimeout(()=>requestAnimationFrame(loop),45);})();}
+  }
 }
 function renderCompare(){
   const labels=Object.values(DATA.plans).map(p=>p.name);
