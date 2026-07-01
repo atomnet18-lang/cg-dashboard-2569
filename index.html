@@ -83,6 +83,8 @@
   .mtbl .future{opacity:.45}
   .dotst{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
   .mfoot{font-size:11.5px;color:var(--muted);padding:4px 24px 22px;line-height:1.6}
+  .reportbody{white-space:pre-wrap;font-size:13px;color:var(--ink);line-height:1.65;background:#fafcfb;border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:130px}
+  .reportbody .empty{color:#b3bfba;font-style:italic}
   .latelist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0;padding:0}
   .latelist li{padding:9px 12px;border-radius:8px;border-left:4px solid;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
   .latelist li.lt-warn{border-color:var(--warn);background:#fdf6e9}
@@ -155,10 +157,17 @@ const APP_HTML=`
       <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--mea-green)"></i> ผลจริง</span></div>
     </div>
   </div>
-  <div class="panel" id="latePanel">
-    <h2><span class="dot"></span>⚠ กิจกรรมย่อยที่ล่าช้ากว่าแผน</h2>
-    <div class="desc" id="lateDesc"></div>
-    <div id="lateBody"></div>
+  <div class="grid2">
+    <div class="panel" id="latePanel">
+      <h2><span class="dot"></span>⚠ กิจกรรมย่อยที่ล่าช้ากว่าแผน</h2>
+      <div class="desc" id="lateDesc"></div>
+      <div id="lateBody"></div>
+    </div>
+    <div class="panel" id="reportPanel">
+      <h2><span class="dot"></span><span id="reportTitle">รายงานประจำเดือน</span></h2>
+      <div class="desc">สรุปภาพรวมการดำเนินงานประจำเดือน (บันทึกผ่าน Excel แท็บ "สรุปรายเดือน")</div>
+      <div id="reportBody" class="reportbody"></div>
+    </div>
   </div>
   <div class="panel">
     <h2><span class="dot"></span>ความคืบหน้ารายกิจกรรม — <span id="planTitle"></span></h2>
@@ -364,7 +373,14 @@ function renderLate(){
   }
   el.innerHTML=h+'</ul>';
 }
-function renderAll(){renderKpis();renderTrend();renderCompare();renderLate();renderTable();}
+function renderReport(){
+  const t=document.getElementById('reportTitle'),b=document.getElementById('reportBody');
+  if(!t||!b)return;
+  t.textContent=`รายงานประจำเดือน ${MONTHS[curMonth]} 2569`;
+  const txt=(DATA.reports&&DATA.reports[curMonth])||'';
+  b.innerHTML=txt?txt.replace(/</g,'&lt;').replace(/\n/g,'<br>'):'<span class="empty">— ยังไม่มีสรุปรายงานสำหรับเดือนนี้ —</span>';
+}
+function renderAll(){renderKpis();renderTrend();renderCompare();renderLate();renderReport();renderTable();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function boot(){

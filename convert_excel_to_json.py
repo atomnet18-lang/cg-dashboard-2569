@@ -292,10 +292,21 @@ def main():
                 n += 1
                 a["aid"] = f"{pfx}-{n:02d}"
 
+    # อ่านสรุปรายเดือนจากแท็บ "สรุปรายเดือน" (A=เดือน, B=ข้อความสรุป)
+    reports = [""] * 12
+    if "สรุปรายเดือน" in wb.sheetnames:
+        wsr = wb["สรุปรายเดือน"]
+        for r in range(1, wsr.max_row + 1):
+            mname = clean(wsr.cell(row=r, column=1).value)
+            if mname in MONTHS:
+                val = wsr.cell(row=r, column=2).value
+                reports[MONTHS.index(mname)] = str(val).strip() if val is not None else ""
+
     out = {
         "updated": "",   # เติมวันที่อัปเดตได้ภายหลัง
         "source": "ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) การไฟฟ้านครหลวง",
         "plans": plans,
+        "reports": reports,
     }
     with open(dst, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
