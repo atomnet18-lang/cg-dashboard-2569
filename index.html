@@ -82,6 +82,9 @@
   .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:18px}
   .panel{background:var(--card);border-radius:var(--r-lg);border:1px solid var(--line);box-shadow:0 1px 4px var(--shadow);padding:18px}
   .panel h2{font-size:15px;color:var(--heading);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .scramble{display:inline-block;white-space:nowrap}
+  .scramble-ch{display:inline-block;text-align:center;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  @media (prefers-reduced-motion: reduce){.scramble-ch{transition:none}}
   .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
   .panel .desc{font-size:12px;color:var(--muted);margin-bottom:12px}
   .chartbox{position:relative;height:300px}
@@ -251,7 +254,7 @@ let DATA=null,curMonth=5,curPlan=null,trendChart,compChart;
 const APP_HTML=`
   <div class="grid2">
     <div class="panel">
-      <h2><span class="dot"></span>เป้าหมายสะสม vs ผลการดำเนินงานจริงสะสม (รายเดือน)</h2>
+      <h2><span class="dot"></span><span class="scramble" id="trendHeadTxt" aria-label="เป้าหมายสะสม vs ผลการดำเนินงานจริงสะสม (รายเดือน)"></span></h2>
       <div class="desc" id="trendDesc"></div>
       <div class="chartbox"><canvas id="trend"></canvas></div>
     </div>
@@ -301,6 +304,64 @@ function planCumActual(p,mi){
 }
 function statusOf(t,a){if(!t)return'idle';if(a>=t)return'ok';if(t-a<=15)return'warn';return'bad';}
 function prefersReducedMotion(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
+
+/* Text Scramble (decode effect): แต่ละตัวอักษรปั่นสุ่มแล้ว "ล็อก" เป็นตัวจริงจากซ้ายไปขวา
+   ความกว้างแต่ละช่องล็อกด้วยการวัดฟอนต์จริงผ่าน canvas (เทียบเท่า tabular glyphs) ป้องกันข้อความสั่น/เนื้อหาข้างเคียงเลื่อน
+   สลับข้อความจริงผ่าน aria-label ทันที ส่วนตัวอักษรที่กำลังปั่นทำเครื่องหมาย aria-hidden ไว้
+   หาก prefers-reduced-motion เปิดอยู่ จะเรนเดอร์ข้อความจริงทันทีโดยไม่มีอนิเมชัน */
+function scrambleText(el, finalText, opts){
+  opts = opts || {};
+  const glyphs = opts.glyphs || 'กขคงจฉชซญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูเแโใไ่้๊๋ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const stepMs = opts.stepMs || 34;
+  const settleMs = opts.settleMs || 360;
+  el.setAttribute('aria-label', finalText);
+  const chars = Array.from(finalText);
+
+  if(prefersReducedMotion()){
+    el.innerHTML='';
+    const still=document.createElement('span');
+    still.setAttribute('aria-hidden','true');
+    still.textContent=finalText;
+    el.appendChild(still);
+    return;
+  }
+
+  const cs=getComputedStyle(el);
+  const font=cs.fontStyle+' '+cs.fontVariant+' '+cs.fontWeight+' '+cs.fontSize+'/'+cs.lineHeight+' '+cs.fontFamily;
+  const canvas=scrambleText._canvas||(scrambleText._canvas=document.createElement('canvas'));
+  let ctx=null;
+  try{ctx=canvas.getContext('2d');if(ctx)ctx.font=font;}catch(e){}
+
+  el.innerHTML='';
+  const wrap=document.createElement('span');
+  wrap.setAttribute('aria-hidden','true');
+  el.appendChild(wrap);
+
+  const spans=chars.map(ch=>{
+    const sp=document.createElement('span');
+    sp.className='scramble-ch';
+    if(ctx)sp.style.width=Math.ceil(ctx.measureText(ch).width)+'px';
+    sp.textContent=ch===' '?'\u00A0':ch;
+    wrap.appendChild(sp);
+    return sp;
+  });
+
+  const start=performance.now();
+  (function frame(now){
+    let running=false;
+    chars.forEach((ch,i)=>{
+      if(ch===' ')return;
+      const lockAt=start+i*stepMs+settleMs;
+      if(now<lockAt){
+        spans[i].textContent=glyphs[(Math.random()*glyphs.length)|0];
+        running=true;
+      }else if(spans[i].textContent!==ch){
+        spans[i].textContent=ch;
+      }
+    });
+    if(running)requestAnimationFrame(frame);
+  })(start);
+}
 // ทำให้องค์ประกอบกดด้วยเมาส์/คีย์บอร์ดได้เหมือนกัน (Enter/Space) เพื่อให้ focus-visible มีความหมายจริง
 function makeActivatable(el,fn){
   el.tabIndex=0;el.setAttribute('role','button');
@@ -530,6 +591,8 @@ function boot(){
   if(DATA.updated)document.getElementById('updated').textContent="อัปเดต: "+DATA.updated;
   curPlan=Object.keys(DATA.plans)[0];
   renderAll();
+  const trendHead=document.getElementById('trendHeadTxt');
+  if(trendHead)scrambleText(trendHead, trendHead.getAttribute('aria-label'));
 }
 
 fetch('data.json',{cache:'no-store'})
