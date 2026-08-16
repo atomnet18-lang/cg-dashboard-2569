@@ -87,7 +87,6 @@
   .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
   .panel .desc{font-size:12px;color:var(--muted);margin-bottom:12px}
   .chartbox{position:relative;height:300px}
-  .chartbox.sm{height:260px}
   .tablewrap{overflow:auto;max-height:560px;border-radius:var(--r-md);border:1px solid var(--line)}
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
   thead th{position:sticky;top:0;background:var(--mea-green);color:#fff;font-weight:600;padding:10px 12px;text-align:left;z-index:2;font-size:12.5px}
@@ -101,6 +100,14 @@
   .stat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:var(--chip-ink)}
   .w{font-size:11px;color:var(--muted)}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+  .barlist{display:flex;flex-direction:column;gap:16px;padding:8px 0 4px}
+  .barrow{display:grid;grid-template-columns:76px 1fr 52px;align-items:center;gap:14px}
+  .barlabel{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bartrack{position:relative;height:16px;border-radius:var(--r-pill);background:var(--card-alt);overflow:visible}
+  .barfill{height:100%;border-radius:var(--r-pill);transition:width .6s cubic-bezier(.22,.9,.3,1)}
+  @media (prefers-reduced-motion: reduce){.barfill{transition:none}}
+  .bartick{position:absolute;top:-3px;width:2px;height:22px;background:var(--muted);border-radius:2px;opacity:.7}
+  .barpct{font-size:16px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
   .legend span{display:inline-flex;align-items:center;gap:5px}
   .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
   .note{font-size:11.5px;color:var(--muted);margin-top:14px;padding:10px 12px;background:var(--mea-green-l);border-radius:8px;border-left:3px solid var(--mea-gold)}
@@ -248,7 +255,7 @@ const pulsePlugin={id:'pulse',afterDatasetsDraw(chart){
     ctx.restore();
   });
 }};
-let DATA=null,curMonth=5,curPlan=null,trendChart,compChart;
+let DATA=null,curMonth=5,curPlan=null,trendChart;
 
 const APP_HTML=`
   <div class="grid2">
@@ -259,9 +266,14 @@ const APP_HTML=`
     </div>
     <div class="panel">
       <h2><span class="dot"></span>เปรียบเทียบความคืบหน้า 4 แผน ณ เดือนปัจจุบัน</h2>
-      <div class="desc">แท่งทอง = เป้าหมายสะสม · แท่งเขียว = ผลจริงสะสม</div>
-      <div class="chartbox sm"><canvas id="compare"></canvas></div>
-      <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--ok)"></i> ผลจริง</span></div>
+      <div class="desc">แท่ง = ผลจริงสะสม (สีตามสถานะ) · เส้นขีด = เป้าหมายสะสม</div>
+      <div class="barlist" id="compareList"></div>
+      <div class="legend">
+        <span><i style="background:var(--ok)"></i> ตามแผน/เกินเป้า</span>
+        <span><i style="background:var(--warn)"></i> ใกล้เป้า</span>
+        <span><i style="background:var(--bad)"></i> ต่ำกว่าเป้า</span>
+        <span><i style="background:var(--idle)"></i> ยังไม่ถึงกำหนด</span>
+      </div>
     </div>
   </div>
   <div class="grid2">
@@ -453,15 +465,21 @@ function renderTrend(){
   if(!window._pulseRAF&&!prefersReducedMotion()){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}requestAnimationFrame(loop);})();}
 }
 function renderCompare(){
-  const labels=Object.values(DATA.plans).map(p=>p.name);
-  const tgt=Object.values(DATA.plans).map(p=>p.cum[curMonth]);
-  const act=Object.values(DATA.plans).map(p=>planCumActual(p,curMonth));
-  const cc=chartColors();
-  const data={labels,datasets:[
-    {label:'เป้าหมาย',data:tgt,backgroundColor:cc.gold,borderRadius:5},
-    {label:'ผลจริง',data:act,backgroundColor:cc.green,borderRadius:5}]};
-  if(compChart){compChart.data=data;compChart.update();}
-  else compChart=new Chart(document.getElementById('compare'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false}}}});
+  const box=document.getElementById('compareList');
+  const reduced=prefersReducedMotion();
+  box.innerHTML='';
+  Object.values(DATA.plans).forEach(p=>{
+    const tgt=p.cum[curMonth],act=planCumActual(p,curMonth),st=statusOf(tgt,act);
+    const row=document.createElement('div');row.className='barrow';
+    row.innerHTML=`<div class="barlabel" title="${(p.full||p.name).replace(/"/g,'&quot;')}">${p.name}</div>
+      <div class="bartrack"><div class="barfill" style="width:0%;background:linear-gradient(90deg,${C[st]}66,${C[st]})"></div><div class="bartick" style="left:${Math.min(tgt,100)}%" title="เป้าหมายสะสม ${tgt}%"></div></div>
+      <div class="barpct">${act}%</div>`;
+    box.appendChild(row);
+    const fill=row.querySelector('.barfill');
+    const w=Math.min(act,100)+'%';
+    if(reduced){fill.style.width=w;}
+    else requestAnimationFrame(()=>requestAnimationFrame(()=>{fill.style.width=w;}));
+  });
 }
 function renderTable(){
   const p=DATA.plans[curPlan];
