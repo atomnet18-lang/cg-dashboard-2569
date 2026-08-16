@@ -7,38 +7,39 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    /* โทนแบรนด์น้ำตาลเข้ม/ส้ม — ชุดเดียวกับดาร์กโหมด เพียงพื้นหลังสว่างกว่า */
-    --mea-green:#4a3323;--mea-green-d:#241a12;--mea-green-l:#fbeee0;
-    --mea-gold:#e8772e;--mea-gold-d:#c25e1e;
-    --ink:#2b2018;--muted:#7a6f5f;--line:#ecdfd0;--bg:#faf5ef;--card:#fffdfb;
-    --card-alt:#f7efe4;--select-bg:#fffdfb;--shadow:rgba(80,50,20,.07);--overlay:rgba(30,18,8,.55);
-    --curm-bg:#fbe7cc;--warn-bg:#fdf2df;--bad-bg:#fbe6e2;--empty-ink:#b5a68f;
-    --header-sub:#f0ddc8;--header-soft:#ecd3b4;
-    --hover-shadow:rgba(232,119,46,.16);--active-shadow:rgba(232,119,46,.22);
-    --ok:#1f6e3d;--warn:#8f7208;--bad:#bf3b37;--idle:#7f7261;
+    /* โทนม่วง-ลาเวนเดอร์ + กรมท่า อ้างอิงจากภาพตัวอย่าง (Tasklyn) — พื้นหลังสว่าง */
+    --mea-green:#291f4d;--mea-green-d:#1c1638;--mea-green-l:#ece9fb;
+    --mea-gold:#ec8463;--mea-gold-d:#d16a49;
+    --ink:#241f42;--muted:#6b7280;--line:#e6e4f5;--bg:#eef0fb;--card:#ffffff;
+    --card-alt:#f5f3fc;--select-bg:#ffffff;--shadow:rgba(70,60,140,.08);--overlay:rgba(30,20,60,.55);
+    --curm-bg:#fdeecb;--warn-bg:#fdece3;--bad-bg:#fbe1df;--empty-ink:#b8b4cf;
+    --header-sub:#e7e3fb;--header-soft:#d9d4f5;
+    --hover-shadow:rgba(236,132,99,.18);--active-shadow:rgba(236,132,99,.24);
+    --ok:#5f4fcf;--warn:#d9773f;--bad:#c23f32;--idle:#6da9e7;
     /* Liquid Glass: พื้นผิวกระจกสำหรับ "ชั้นควบคุม" เท่านั้น (header/ปุ่ม/สวิตช์) เนื้อหาหลักยังทึบเสมอ */
-    --glass-tint:255,253,251;--glass-a1:.68;--glass-a2:.42;--glass-edge:rgba(255,255,255,.6);--glass-hl:rgba(255,255,255,.75);
-    --track-off:rgba(43,32,24,.14);
+    --glass-tint:255,255,255;--glass-a1:.68;--glass-a2:.42;--glass-edge:rgba(255,255,255,.6);--glass-hl:rgba(255,255,255,.75);
+    --track-off:rgba(36,31,66,.14);
     --r-pill:999px;--r-xl:26px;--r-lg:20px;--r-md:14px;--r-sm:10px;
-    --ambient-1:#f7d9b0;--ambient-2:#f3c39a;--ambient-3:#eadfce;
+    --ambient-1:#cfe0f7;--ambient-2:#d9d3f7;--ambient-3:#f7d9c9;
     /* ข้อความ "แบรนด์" ที่ใช้วางบนพื้นหลากหลาย ต้องแยกจากสีพื้นเพราะโทนต่างกันคนละทิศระหว่างโหมด */
-    --heading:#241a12;--label-ink:#241a12;--accent-text:#c25e1e;--chip-ink:#fff;
+    --heading:#1c1638;--label-ink:#1c1638;--accent-text:#a84a24;--chip-ink:#fff;
   }
   /* ===== Dark mode: อ้างอิงโทนสีจากภาพตัวอย่าง (ดำ/น้ำตาลเข้ม + ส้ม) ===== */
   html[data-theme="dark"]{
-    --mea-green:#3a2a1e;--mea-green-d:#241a12;--mea-green-l:#3f2f1c;
-    --mea-gold:#e8772e;--mea-gold-d:#c25e1e;
-    --ink:#f5eee4;--muted:#a8977f;--line:#3a2e24;--bg:#16100d;--card:#1f1814;
-    --card-alt:#2a211a;--select-bg:#2a211a;--shadow:rgba(0,0,0,.35);--overlay:rgba(8,5,3,.7);
-    --curm-bg:#3a2a14;--warn-bg:#332210;--bad-bg:#3a1815;--empty-ink:#6e6153;
-    --header-sub:#e8d9c8;--header-soft:#dcc9b3;
-    --hover-shadow:rgba(232,119,46,.22);--active-shadow:rgba(232,119,46,.30);
-    --ok:#5fcb7c;--warn:#f0b429;--bad:#f16b60;--idle:#948674;
-    /* ข้อความแบรนด์: เดิมใช้สีน้ำตาลเข้มเป็นตัวหนังสือ (ใช้ได้ในโหมดสว่างเท่านั้น) ในโหมดมืดต้องสว่างพอจึงจะอ่านออก */
-    --heading:#e8772e;--label-ink:#ecd9bd;--accent-text:#e8772e;--chip-ink:#1a1310;
-    --glass-tint:31,24,20;--glass-a1:.60;--glass-a2:.34;--glass-edge:rgba(255,255,255,.14);--glass-hl:rgba(255,255,255,.10);
+    /* โทนม่วง-ลาเวนเดอร์ + กรมท่า อ้างอิงจากภาพตัวอย่าง (Tasklyn) — พื้นหลังมืด */
+    --mea-green:#2a2251;--mea-green-d:#120c28;--mea-green-l:#372c68;
+    --mea-gold:#ec8463;--mea-gold-d:#d16a49;
+    --ink:#ece9f9;--muted:#a49bc9;--line:#342a5c;--bg:#110c26;--card:#1a1436;
+    --card-alt:#211a45;--select-bg:#211a45;--shadow:rgba(0,0,0,.35);--overlay:rgba(6,4,16,.7);
+    --curm-bg:#3a2f14;--warn-bg:#3a2415;--bad-bg:#3a1a17;--empty-ink:#675f8c;
+    --header-sub:#ded7f7;--header-soft:#cfc6ef;
+    --hover-shadow:rgba(240,145,110,.22);--active-shadow:rgba(240,145,110,.30);
+    --ok:#b39cf0;--warn:#f0a15f;--bad:#f2685c;--idle:#7fb8f5;
+    /* ข้อความแบรนด์: โหมดมืดใช้ส้มสว่างเป็นหัวข้อเน้น และม่วงอ่อนสำหรับตัวหนังสือรอง */
+    --heading:#f0a15f;--label-ink:#ded7f7;--accent-text:#f0a15f;--chip-ink:#14102a;
+    --glass-tint:26,20,54;--glass-a1:.60;--glass-a2:.34;--glass-edge:rgba(255,255,255,.14);--glass-hl:rgba(255,255,255,.10);
     --track-off:rgba(255,255,255,.16);
-    --ambient-1:#4a3018;--ambient-2:#3a2614;--ambient-3:#241a10;
+    --ambient-1:#3a2f6e;--ambient-2:#2a3f66;--ambient-3:#241a3d;
   }
   html[data-theme="dark"] body{background:var(--bg)}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -212,21 +213,20 @@
 <script>
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 // สีสถานะ ok/warn/bad/idle — ปรับความสว่างต่างกันระหว่างโหมดสว่าง/มืด เพื่อให้อ่านง่ายบนพื้นเข้ม
-const C_LIGHT={ok:'#1f6e3d',warn:'#8f7208',bad:'#bf3b37',idle:'#7f7261'};
-const C_DARK ={ok:'#5fcb7c',warn:'#f0b429',bad:'#f16b60',idle:'#948674'};
+const C_LIGHT={ok:'#5f4fcf',warn:'#d9773f',bad:'#c23f32',idle:'#6da9e7'};
+const C_DARK ={ok:'#b39cf0',warn:'#f0a15f',bad:'#f2685c',idle:'#7fb8f5'};
 const C={...C_LIGHT};
-// สีตัวอักษรบนป้ายสถานะ (chip/stat) ต้อง "ปรับตามพื้นหลัง" — โหมดมืดพื้นสถานะค่อนข้างสว่าง จึงต้องใช้ตัวอักษรเข้ม
-// (ยกเว้น idle ที่พื้นยังเข้มพอให้ใช้ตัวอักษรขาวได้)
-const CINK_LIGHT={ok:'#fff',warn:'#fff',bad:'#fff',idle:'#fff'};
-const CINK_DARK ={ok:'#1a1310',warn:'#1a1310',bad:'#1a1310',idle:'#1a1310'};
+// สีตัวอักษรบนป้ายสถานะ (chip/stat) ต้อง "ปรับตามพื้นหลัง" ต่อสถานะ — คำนวณคอนทราสต์ยืนยันแล้วทุกคู่ (WCAG AA)
+const CINK_LIGHT={ok:'#fff',warn:'#1c1638',bad:'#fff',idle:'#1c1638'};
+const CINK_DARK ={ok:'#14102a',warn:'#14102a',bad:'#14102a',idle:'#14102a'};
 const CINK={...CINK_LIGHT};
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
 function applyStatusColors(){Object.assign(C, isDark()?C_DARK:C_LIGHT);Object.assign(CINK, isDark()?CINK_DARK:CINK_LIGHT);}
 // สีเส้น/พื้นที่กราฟ (เป้าหมาย=ทอง/ส้ม, ผลจริง=เขียว) ปรับตามธีม
 function chartColors(){
   return isDark()
-    ?{gold:'#e8772e',goldFill:'rgba(232,119,46,.20)',green:C_DARK.ok,greenFill:'rgba(95,203,124,.16)'}
-    :{gold:'#e8772e',goldFill:'rgba(232,119,46,.14)',green:C_LIGHT.ok,greenFill:'rgba(46,158,91,.10)'};
+    ?{gold:'#ec8463',goldFill:'rgba(236,132,99,.20)',green:C_DARK.ok,greenFill:'rgba(179,156,240,.18)'}
+    :{gold:'#ec8463',goldFill:'rgba(236,132,99,.14)',green:C_LIGHT.ok,greenFill:'rgba(95,79,207,.12)'};
 }
 // ปลั๊กอินจุดกระพริบ (pulse) ที่จุดเดือนปัจจุบัน บนกราฟเส้นเป้าหมาย/ผลจริง
 const pulsePlugin={id:'pulse',afterDatasetsDraw(chart){
