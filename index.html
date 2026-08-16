@@ -82,7 +82,6 @@
   .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:18px}
   .panel{background:var(--card);border-radius:var(--r-lg);border:1px solid var(--line);box-shadow:0 1px 4px var(--shadow);padding:18px}
   .panel h2{font-size:15px;color:var(--heading);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-  .scramble{display:inline-block;white-space:nowrap}
   .scramble-ch{display:inline-block;text-align:center;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
   @media (prefers-reduced-motion: reduce){.scramble-ch{transition:none}}
   .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
@@ -254,7 +253,7 @@ let DATA=null,curMonth=5,curPlan=null,trendChart,compChart;
 const APP_HTML=`
   <div class="grid2">
     <div class="panel">
-      <h2><span class="dot"></span><span class="scramble" id="trendHeadTxt" aria-label="เป้าหมายสะสม vs ผลการดำเนินงานจริงสะสม (รายเดือน)"></span></h2>
+      <h2><span class="dot"></span>เป้าหมายสะสม vs ผลการดำเนินงานจริงสะสม (รายเดือน)</h2>
       <div class="desc" id="trendDesc"></div>
       <div class="chartbox"><canvas id="trend"></canvas></div>
     </div>
@@ -312,10 +311,17 @@ function prefersReducedMotion(){return window.matchMedia&&window.matchMedia('(pr
 function scrambleText(el, finalText, opts){
   opts = opts || {};
   const glyphs = opts.glyphs || 'กขคงจฉชซญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูเแโใไ่้๊๋ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const stepMs = opts.stepMs || 34;
-  const settleMs = opts.settleMs || 360;
   el.setAttribute('aria-label', finalText);
   const chars = Array.from(finalText);
+  // ความยาวคำอธิบายเปลี่ยนได้บ่อย (สลับแผน/เดือน) จึงคุมสเปรดรวมไม่ให้ยาวเกินไปแม้ข้อความยาวมาก
+  const nonSpace = chars.filter(c=>c!==' ').length||1;
+  const totalSpread = opts.totalSpread || Math.min(600, nonSpace*14);
+  const stepMs = opts.stepMs || (totalSpread/nonSpace);
+  const settleMs = opts.settleMs || 300;
+
+  scrambleText._runs = scrambleText._runs || new WeakMap();
+  const token = {};
+  scrambleText._runs.set(el, token);
 
   if(prefersReducedMotion()){
     el.innerHTML='';
@@ -337,20 +343,26 @@ function scrambleText(el, finalText, opts){
   wrap.setAttribute('aria-hidden','true');
   el.appendChild(wrap);
 
+  // เว้นวรรคใส่เป็น text node ปกติ (ไม่ใช่ span ตายตัว) เพื่อให้ข้อความยาวๆ ยังตัดบรรทัดได้ตามปกติ
   const spans=chars.map(ch=>{
+    if(ch===' '){
+      wrap.appendChild(document.createTextNode(' '));
+      return null;
+    }
     const sp=document.createElement('span');
     sp.className='scramble-ch';
     if(ctx)sp.style.width=Math.ceil(ctx.measureText(ch).width)+'px';
-    sp.textContent=ch===' '?'\u00A0':ch;
+    sp.textContent=ch;
     wrap.appendChild(sp);
     return sp;
   });
 
   const start=performance.now();
   (function frame(now){
+    if(scrambleText._runs.get(el)!==token)return;
     let running=false;
     chars.forEach((ch,i)=>{
-      if(ch===' ')return;
+      if(ch===' '||!spans[i])return;
       const lockAt=start+i*stepMs+settleMs;
       if(now<lockAt){
         spans[i].textContent=glyphs[(Math.random()*glyphs.length)|0];
@@ -403,19 +415,40 @@ function renderKpis(){
     box.appendChild(card);
   });
 }
+// อนิเมชัน "วาดเส้นจากซ้ายไปขวา" แบบ S-curve: แต่ละจุดข้อมูลจะค่อยๆ ปรากฏตามลำดับเดือน
+// อ้างอิงสูตรทางการของ Chart.js (progressive-line) ปิดอนิเมชันทันทีถ้า prefers-reduced-motion เปิดอยู่
+function trendDrawAnimation(pointCount){
+  if(prefersReducedMotion())return false;
+  const totalDuration=900;
+  const delayBetweenPoints=totalDuration/Math.max(pointCount,1);
+  const previousY=(ctx)=>ctx.index===0
+    ?ctx.chart.scales.y.getPixelForValue(0)
+    :ctx.chart.getDatasetMeta(ctx.datasetIndex).data[ctx.index-1].getProps(['y'],true).y;
+  return{
+    x:{type:'number',easing:'linear',duration:delayBetweenPoints,from:NaN,delay(ctx){
+      if(ctx.type!=='data'||ctx.xStarted)return 0;
+      ctx.xStarted=true;
+      return ctx.index*delayBetweenPoints;
+    }},
+    y:{type:'number',easing:'linear',duration:delayBetweenPoints,from:previousY,delay(ctx){
+      if(ctx.type!=='data'||ctx.yStarted)return 0;
+      ctx.yStarted=true;
+      return ctx.index*delayBetweenPoints;
+    }}
+  };
+}
 function renderTrend(){
   const p=DATA.plans[curPlan];
   const actCum=MONTHS.map((_,i)=>i<=curMonth?planCumActual(p,i):null);
-  document.getElementById('trendDesc').textContent=(p.full||p.name)+" — เส้นทอง=เป้าหมายสะสม, เส้นเขียว=ผลจริงสะสม (ถึงเดือน "+MONTHS[curMonth]+")";
+  scrambleText(document.getElementById('trendDesc'), (p.full||p.name)+" — เส้นทอง=เป้าหมายสะสม, เส้นเขียว=ผลจริงสะสม (ถึงเดือน "+MONTHS[curMonth]+")");
   const cc=chartColors();
   const data={labels:MONTHS,datasets:[
     {label:'เป้าหมายสะสม (%)',data:p.cum,borderColor:cc.gold,backgroundColor:cc.goldFill,borderWidth:2,tension:.3,fill:true,pointRadius:3},
     {label:'ผลจริงสะสม (%)',data:actCum,borderColor:cc.green,backgroundColor:cc.greenFill,borderWidth:2.5,tension:.3,fill:true,pointRadius:3,spanGaps:false}]};
-  if(trendChart){trendChart.data=data;trendChart.update();}
-  else{
-    trendChart=new Chart(document.getElementById('trend'),{type:'line',data,plugins:[pulsePlugin],options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
-    if(!window._pulseRAF&&!prefersReducedMotion()){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}setTimeout(()=>requestAnimationFrame(loop),45);})();}
-  }
+  // ทำลายกราฟเดิมแล้วสร้างใหม่ทุกครั้ง (แทนการ .update()) เพื่อให้เอฟเฟกต์วาดเส้นซ้าย→ขวาเล่นซ้ำทุกครั้งที่สลับแผน/เดือน
+  if(trendChart){trendChart.destroy();trendChart=null;}
+  trendChart=new Chart(document.getElementById('trend'),{type:'line',data,plugins:[pulsePlugin],options:{responsive:true,maintainAspectRatio:false,animation:trendDrawAnimation(MONTHS.length),scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
+  if(!window._pulseRAF&&!prefersReducedMotion()){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}setTimeout(()=>requestAnimationFrame(loop),45);})();}
 }
 function renderCompare(){
   const labels=Object.values(DATA.plans).map(p=>p.name);
@@ -591,8 +624,6 @@ function boot(){
   if(DATA.updated)document.getElementById('updated').textContent="อัปเดต: "+DATA.updated;
   curPlan=Object.keys(DATA.plans)[0];
   renderAll();
-  const trendHead=document.getElementById('trendHeadTxt');
-  if(trendHead)scrambleText(trendHead, trendHead.getAttribute('aria-label'));
 }
 
 fetch('data.json',{cache:'no-store'})
