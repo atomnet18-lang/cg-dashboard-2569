@@ -7,14 +7,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    --mea-green:#1e3a8a;--mea-green-d:#004d2e;--mea-green-l:#e6f2ec;
-    --mea-gold:#c9a13b;--mea-gold-d:#a8842a;
-    --ink:#1c2b25;--muted:#5e6f68;--line:#e3eae6;--bg:#f4f7f5;--card:#fff;
-    --card-alt:#fafcfb;--select-bg:#fff;--shadow:rgba(0,0,0,.04);--overlay:rgba(20,35,28,.55);
-    --curm-bg:#f7efd8;--warn-bg:#fdf6e9;--bad-bg:#fbeceb;--empty-ink:#b3bfba;
-    --header-sub:#d4e7dd;--header-soft:#cfe3d8;
-    --hover-shadow:rgba(0,107,63,.14);--active-shadow:rgba(0,107,63,.18);
-    --ok:#2e9e5b;--warn:#e0a526;--bad:#d9534f;--idle:#9aa6a1;
+    /* โทนแบรนด์น้ำตาลเข้ม/ส้ม — ชุดเดียวกับดาร์กโหมด เพียงพื้นหลังสว่างกว่า */
+    --mea-green:#4a3323;--mea-green-d:#241a12;--mea-green-l:#fbeee0;
+    --mea-gold:#e8772e;--mea-gold-d:#c25e1e;
+    --ink:#2b2018;--muted:#7a6f5f;--line:#ecdfd0;--bg:#faf5ef;--card:#fffdfb;
+    --card-alt:#f7efe4;--select-bg:#fffdfb;--shadow:rgba(80,50,20,.07);--overlay:rgba(30,18,8,.55);
+    --curm-bg:#fbe7cc;--warn-bg:#fdf2df;--bad-bg:#fbe6e2;--empty-ink:#b5a68f;
+    --header-sub:#f0ddc8;--header-soft:#ecd3b4;
+    --hover-shadow:rgba(232,119,46,.16);--active-shadow:rgba(232,119,46,.22);
+    --ok:#1f6e3d;--warn:#8f7208;--bad:#bf3b37;--idle:#7f7261;
   }
   /* ===== Dark mode: อ้างอิงโทนสีจากภาพตัวอย่าง (ดำ/น้ำตาลเข้ม + ส้ม) ===== */
   html[data-theme="dark"]{
@@ -153,7 +154,7 @@
 <script>
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 // สีสถานะ ok/warn/bad/idle — ปรับความสว่างต่างกันระหว่างโหมดสว่าง/มืด เพื่อให้อ่านง่ายบนพื้นเข้ม
-const C_LIGHT={ok:'#2e9e5b',warn:'#e0a526',bad:'#d9534f',idle:'#9aa6a1'};
+const C_LIGHT={ok:'#1f6e3d',warn:'#8f7208',bad:'#bf3b37',idle:'#7f7261'};
 const C_DARK ={ok:'#5fcb7c',warn:'#f0b429',bad:'#f16b60',idle:'#7a6f62'};
 const C={...C_LIGHT};
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
@@ -161,8 +162,8 @@ function applyStatusColors(){Object.assign(C, isDark()?C_DARK:C_LIGHT);}
 // สีเส้น/พื้นที่กราฟ (เป้าหมาย=ทอง/ส้ม, ผลจริง=เขียว) ปรับตามธีม
 function chartColors(){
   return isDark()
-    ?{gold:'#e8772e',goldFill:'rgba(232,119,46,.20)',green:'#5fcb7c',greenFill:'rgba(95,203,124,.16)'}
-    :{gold:'#c9a13b',goldFill:'rgba(201,161,59,.12)',green:'#006b3f',greenFill:'rgba(0,107,63,.10)'};
+    ?{gold:'#e8772e',goldFill:'rgba(232,119,46,.20)',green:C_DARK.ok,greenFill:'rgba(95,203,124,.16)'}
+    :{gold:'#e8772e',goldFill:'rgba(232,119,46,.14)',green:C_LIGHT.ok,greenFill:'rgba(46,158,91,.10)'};
 }
 // ปลั๊กอินจุดกระพริบ (pulse) ที่จุดเดือนปัจจุบัน บนกราฟเส้นเป้าหมาย/ผลจริง
 const pulsePlugin={id:'pulse',afterDatasetsDraw(chart){
@@ -195,7 +196,7 @@ const APP_HTML=`
       <h2><span class="dot"></span>เปรียบเทียบความคืบหน้า 4 แผน ณ เดือนปัจจุบัน</h2>
       <div class="desc">แท่งทอง = เป้าหมายสะสม · แท่งเขียว = ผลจริงสะสม</div>
       <div class="chartbox sm"><canvas id="compare"></canvas></div>
-      <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--mea-green)"></i> ผลจริง</span></div>
+      <div class="legend"><span><i style="background:var(--mea-gold)"></i> เป้าหมาย</span><span><i style="background:var(--ok)"></i> ผลจริง</span></div>
     </div>
   </div>
   <div class="grid2">
