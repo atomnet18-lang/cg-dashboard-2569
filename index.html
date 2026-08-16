@@ -448,7 +448,9 @@ function renderTrend(){
   // ทำลายกราฟเดิมแล้วสร้างใหม่ทุกครั้ง (แทนการ .update()) เพื่อให้เอฟเฟกต์วาดเส้นซ้าย→ขวาเล่นซ้ำทุกครั้งที่สลับแผน/เดือน
   if(trendChart){trendChart.destroy();trendChart=null;}
   trendChart=new Chart(document.getElementById('trend'),{type:'line',data,plugins:[pulsePlugin],options:{responsive:true,maintainAspectRatio:false,animation:trendDrawAnimation(MONTHS.length),scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
-  if(!window._pulseRAF&&!prefersReducedMotion()){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}setTimeout(()=>requestAnimationFrame(loop),45);})();}
+  // ลูปวาดซ้ำเพื่ออนิเมชันจุดกระพริบ — เดิมหน่วงด้วย setTimeout(45ms) (~22Hz) ทำให้เห็นสะดุด
+  // ตัดการหน่วงออก ให้ requestAnimationFrame วาดถี่สุดเท่าที่จอภาพรองรับ (60/120/144/180Hz ฯลฯ) ลื่นไหลขึ้น
+  if(!window._pulseRAF&&!prefersReducedMotion()){window._pulseRAF=true;(function loop(){if(trendChart)try{trendChart.draw();}catch(e){}requestAnimationFrame(loop);})();}
 }
 function renderCompare(){
   const labels=Object.values(DATA.plans).map(p=>p.name);
