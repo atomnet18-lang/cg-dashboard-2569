@@ -21,20 +21,24 @@
     --track-off:rgba(43,32,24,.14);
     --r-pill:999px;--r-xl:26px;--r-lg:20px;--r-md:14px;--r-sm:10px;
     --ambient-1:#f7d9b0;--ambient-2:#f3c39a;--ambient-3:#eadfce;
+    /* ข้อความ "แบรนด์" ที่ใช้วางบนพื้นหลากหลาย ต้องแยกจากสีพื้นเพราะโทนต่างกันคนละทิศระหว่างโหมด */
+    --heading:#241a12;--label-ink:#241a12;--accent-text:#c25e1e;--chip-ink:#fff;
   }
   /* ===== Dark mode: อ้างอิงโทนสีจากภาพตัวอย่าง (ดำ/น้ำตาลเข้ม + ส้ม) ===== */
   html[data-theme="dark"]{
-    --mea-green:#3a2a1e;--mea-green-d:#241a12;--mea-green-l:#2a211a;
+    --mea-green:#3a2a1e;--mea-green-d:#241a12;--mea-green-l:#3f2f1c;
     --mea-gold:#e8772e;--mea-gold-d:#c25e1e;
     --ink:#f5eee4;--muted:#a8977f;--line:#3a2e24;--bg:#16100d;--card:#1f1814;
     --card-alt:#2a211a;--select-bg:#2a211a;--shadow:rgba(0,0,0,.35);--overlay:rgba(8,5,3,.7);
     --curm-bg:#3a2a14;--warn-bg:#332210;--bad-bg:#3a1815;--empty-ink:#6e6153;
     --header-sub:#e8d9c8;--header-soft:#dcc9b3;
     --hover-shadow:rgba(232,119,46,.22);--active-shadow:rgba(232,119,46,.30);
-    --ok:#5fcb7c;--warn:#f0b429;--bad:#f16b60;--idle:#7a6f62;
+    --ok:#5fcb7c;--warn:#f0b429;--bad:#f16b60;--idle:#948674;
+    /* ข้อความแบรนด์: เดิมใช้สีน้ำตาลเข้มเป็นตัวหนังสือ (ใช้ได้ในโหมดสว่างเท่านั้น) ในโหมดมืดต้องสว่างพอจึงจะอ่านออก */
+    --heading:#e8772e;--label-ink:#ecd9bd;--accent-text:#e8772e;--chip-ink:#1a1310;
     --glass-tint:31,24,20;--glass-a1:.60;--glass-a2:.34;--glass-edge:rgba(255,255,255,.14);--glass-hl:rgba(255,255,255,.10);
     --track-off:rgba(255,255,255,.16);
-    --ambient-1:#3a2410;--ambient-2:#2c1c10;--ambient-3:#1c130c;
+    --ambient-1:#4a3018;--ambient-2:#3a2614;--ambient-3:#241a10;
   }
   html[data-theme="dark"] body{background:var(--bg)}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -73,10 +77,10 @@
   .kpi .fill{height:100%;border-radius:6px}
   .kpi .tmark{position:absolute;top:-2px;width:2px;height:12px;background:var(--mea-gold-d)}
   .kpi .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px}
-  .chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;color:#fff}
+  .chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;color:var(--chip-ink)}
   .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:18px}
   .panel{background:var(--card);border-radius:var(--r-lg);border:1px solid var(--line);box-shadow:0 1px 4px var(--shadow);padding:18px}
-  .panel h2{font-size:15px;color:var(--mea-green-d);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .panel h2{font-size:15px;color:var(--heading);margin-bottom:4px;display:flex;align-items:center;gap:8px}
   .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
   .panel .desc{font-size:12px;color:var(--muted);margin-bottom:12px}
   .chartbox{position:relative;height:300px}
@@ -88,22 +92,22 @@
   tbody tr:nth-child(even){background:var(--card-alt)}
   tbody tr:hover{background:var(--mea-green-l)}
   td.center{text-align:center;white-space:nowrap}
-  .grp{background:var(--mea-green-l)!important;font-weight:700;color:var(--mea-green-d)}
+  .grp{background:var(--mea-green-l)!important;font-weight:700;color:var(--label-ink)}
   .mini{height:7px;border-radius:5px;background:var(--card-alt);overflow:hidden;min-width:90px}
   .mini i{display:block;height:100%}
-  .stat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
+  .stat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:var(--chip-ink)}
   .w{font-size:11px;color:var(--muted)}
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
   .legend span{display:inline-flex;align-items:center;gap:5px}
   .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
   .note{font-size:11.5px;color:var(--muted);margin-top:14px;padding:10px 12px;background:var(--mea-green-l);border-radius:8px;border-left:3px solid var(--mea-gold)}
   .actrow{cursor:pointer}
-  .actrow .more{font-size:11px;color:var(--mea-gold-d);font-weight:600;white-space:nowrap;opacity:.75}
+  .actrow .more{font-size:11px;color:var(--accent-text);font-weight:600;white-space:nowrap;opacity:.75}
   .actrow:hover .more{opacity:1;text-decoration:underline}
   .modal{display:none;position:fixed;inset:0;background:var(--overlay);z-index:100;align-items:center;justify-content:center;padding:20px}
   .modal.show{display:flex}
   .mbox{background:var(--card);border-radius:var(--r-xl);max-width:760px;width:100%;max-height:86vh;overflow:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-  .mclose{position:absolute;top:14px;right:14px;border:none;background:var(--mea-green-l);color:var(--mea-green-d);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;z-index:2}
+  .mclose{position:absolute;top:14px;right:14px;border:none;background:var(--mea-green-l);color:var(--label-ink);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;z-index:2}
   .mclose:hover{background:var(--mea-green);color:#fff}
   .mhead{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 24px 18px;border-radius:var(--r-xl) var(--r-xl) 0 0}
   .mtag{font-size:12px;font-weight:700;color:var(--mea-gold);letter-spacing:.5px}
@@ -111,13 +115,13 @@
   .msub{font-size:12.5px;color:var(--header-sub)}
   .mtblwrap{padding:18px 24px}
   .mtbl{width:100%;border-collapse:collapse;font-size:13px}
-  .mtbl thead th{background:var(--mea-green-l);color:var(--mea-green-d);padding:9px 10px;text-align:left;font-size:12px;border-bottom:2px solid var(--mea-green)}
+  .mtbl thead th{background:var(--mea-green-l);color:var(--label-ink);padding:9px 10px;text-align:left;font-size:12px;border-bottom:2px solid var(--mea-green)}
   .mtbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-  .mtbl .mcell{font-weight:700;color:var(--mea-green-d);white-space:nowrap}
+  .mtbl .mcell{font-weight:700;color:var(--label-ink);white-space:nowrap}
   .mtbl .ncell{color:var(--ink);line-height:1.5}
   .mtbl .ncell .empty{color:var(--empty-ink);font-style:italic;font-size:12px}
   .mtbl .curm{background:var(--curm-bg)}
-  .mtbl .curm .mcell{color:var(--mea-gold-d)}
+  .mtbl .curm .mcell{color:var(--accent-text)}
   .mtbl .future{opacity:.45}
   .dotst{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
   .mfoot{font-size:11.5px;color:var(--muted);padding:4px 24px 22px;line-height:1.6}
@@ -209,10 +213,15 @@
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 // สีสถานะ ok/warn/bad/idle — ปรับความสว่างต่างกันระหว่างโหมดสว่าง/มืด เพื่อให้อ่านง่ายบนพื้นเข้ม
 const C_LIGHT={ok:'#1f6e3d',warn:'#8f7208',bad:'#bf3b37',idle:'#7f7261'};
-const C_DARK ={ok:'#5fcb7c',warn:'#f0b429',bad:'#f16b60',idle:'#7a6f62'};
+const C_DARK ={ok:'#5fcb7c',warn:'#f0b429',bad:'#f16b60',idle:'#948674'};
 const C={...C_LIGHT};
+// สีตัวอักษรบนป้ายสถานะ (chip/stat) ต้อง "ปรับตามพื้นหลัง" — โหมดมืดพื้นสถานะค่อนข้างสว่าง จึงต้องใช้ตัวอักษรเข้ม
+// (ยกเว้น idle ที่พื้นยังเข้มพอให้ใช้ตัวอักษรขาวได้)
+const CINK_LIGHT={ok:'#fff',warn:'#fff',bad:'#fff',idle:'#fff'};
+const CINK_DARK ={ok:'#1a1310',warn:'#1a1310',bad:'#1a1310',idle:'#1a1310'};
+const CINK={...CINK_LIGHT};
 function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
-function applyStatusColors(){Object.assign(C, isDark()?C_DARK:C_LIGHT);}
+function applyStatusColors(){Object.assign(C, isDark()?C_DARK:C_LIGHT);Object.assign(CINK, isDark()?CINK_DARK:CINK_LIGHT);}
 // สีเส้น/พื้นที่กราฟ (เป้าหมาย=ทอง/ส้ม, ผลจริง=เขียว) ปรับตามธีม
 function chartColors(){
   return isDark()
@@ -325,7 +334,7 @@ function renderKpis(){
     card.innerHTML=`<div class="bar" style="background:${C[st]}"></div>
       <div class="name" title="${(p.full||p.name).replace(/"/g,'&quot;')}">${p.name}</div>
       <div class="num"><span class="actual">${act}%</span><span class="target">/ เป้า ${tgt}%</span>
-        <span class="chip" style="background:${C[st]};margin-left:auto">${st==='ok'?'ตามแผน':st==='warn'?'เฝ้าระวัง':st==='bad'?'ต่ำกว่าเป้า':'รอบันทึก'}</span></div>
+        <span class="chip" style="background:${C[st]};color:${CINK[st]};margin-left:auto">${st==='ok'?'ตามแผน':st==='warn'?'เฝ้าระวัง':st==='bad'?'ต่ำกว่าเป้า':'รอบันทึก'}</span></div>
       <div class="track"><div class="fill" style="width:${Math.min(act,100)}%;background:${C[st]}"></div>
         <div class="tmark" style="left:${Math.min(tgt,100)}%"></div></div>
       <div class="meta"><span>${p.acts.some(a=>a.grp)?('จำนวน '+p.acts.filter(a=>a.grp).length+' หมวด'):('กิจกรรม '+p.acts.filter(a=>a.id).length+' รายการ')}</span><span> ${p.budget}</span></div>`;
@@ -374,7 +383,7 @@ function renderTable(){
       tr.innerHTML=`<td class="center">${cat.num}</td><td><b>หมวด ${cat.num}</b> ${cat.name} <span class="more">▸ รายละเอียด</span></td>
         <td class="center">${wsum}</td><td class="center">${t}%</td><td class="center">${av}%</td>
         <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
-        <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
+        <span class="stat" style="background:${C[st]};color:${CINK[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
       makeActivatable(tr,()=>openCatModal(curPlan,ci));
       tb.appendChild(tr);
     });
@@ -388,7 +397,7 @@ function renderTable(){
     tr.innerHTML=`<td class="center">${a.id}</td><td>${a.name} <span class="more">▸ รายละเอียด</span></td><td><span class="w">${a.unit}</span></td>
       <td class="center">${a.w}</td><td class="center">${t}%</td><td class="center">${av}%</td>
       <td><div style="display:flex;align-items:center;gap:8px"><div class="mini"><i style="width:${Math.min(av,100)}%;background:${C[st]}"></i></div>
-      <span class="stat" style="background:${C[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
+      <span class="stat" style="background:${C[st]};color:${CINK[st]}">${st==='ok'?'ตามแผน':st==='warn'?'ใกล้เป้า':st==='bad'?'ต่ำกว่าเป้า':'รอกำหนด'}</span></div></td>`;
     makeActivatable(tr,()=>openModal(curPlan,a.aid));
     tb.appendChild(tr);
   });
