@@ -10,34 +10,50 @@
     --mea-green:#1e3a8a;--mea-green-d:#004d2e;--mea-green-l:#e6f2ec;
     --mea-gold:#c9a13b;--mea-gold-d:#a8842a;
     --ink:#1c2b25;--muted:#5e6f68;--line:#e3eae6;--bg:#f4f7f5;--card:#fff;
+    --card-alt:#fafcfb;--select-bg:#fff;--shadow:rgba(0,0,0,.04);--overlay:rgba(20,35,28,.55);
+    --curm-bg:#f7efd8;--warn-bg:#fdf6e9;--bad-bg:#fbeceb;--empty-ink:#b3bfba;
+    --header-sub:#d4e7dd;--header-soft:#cfe3d8;
+    --hover-shadow:rgba(0,107,63,.14);--active-shadow:rgba(0,107,63,.18);
     --ok:#2e9e5b;--warn:#e0a526;--bad:#d9534f;--idle:#9aa6a1;
   }
+  /* ===== Dark mode: อ้างอิงโทนสีจากภาพตัวอย่าง (ดำ/น้ำตาลเข้ม + ส้ม) ===== */
+  html[data-theme="dark"]{
+    --mea-green:#3a2a1e;--mea-green-d:#241a12;--mea-green-l:#2a211a;
+    --mea-gold:#e8772e;--mea-gold-d:#c25e1e;
+    --ink:#f5eee4;--muted:#a8977f;--line:#3a2e24;--bg:#16100d;--card:#1f1814;
+    --card-alt:#2a211a;--select-bg:#2a211a;--shadow:rgba(0,0,0,.35);--overlay:rgba(8,5,3,.7);
+    --curm-bg:#3a2a14;--warn-bg:#332210;--bad-bg:#3a1815;--empty-ink:#6e6153;
+    --header-sub:#e8d9c8;--header-soft:#dcc9b3;
+    --hover-shadow:rgba(232,119,46,.22);--active-shadow:rgba(232,119,46,.30);
+    --ok:#5fcb7c;--warn:#f0b429;--bad:#f16b60;--idle:#7a6f62;
+  }
+  html[data-theme="dark"] body{background:var(--bg)}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Segoe UI","Sarabun",Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
   header{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 26px;box-shadow:0 2px 12px rgba(0,0,0,.12)}
   header .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .logo{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#fff;display:block;flex:none}
   header h1{font-size:20px;font-weight:700}
-  header .sub{color:#d4e7dd;font-size:13px;margin-top:2px}
-  .asof{margin-left:auto;text-align:right;font-size:12px;color:#cfe3d8}
-  .asof select{margin-top:4px;padding:5px 8px;border-radius:7px;border:none;font-size:13px;background:#fff;color:var(--ink)}
+  header .sub{color:var(--header-sub);font-size:13px;margin-top:2px}
+  .asof{margin-left:auto;text-align:right;font-size:12px;color:var(--header-soft)}
+  .asof select{margin-top:4px;padding:5px 8px;border-radius:7px;border:none;font-size:13px;background:var(--select-bg);color:var(--ink)}
   .wrap{max-width:1280px;margin:0 auto;padding:22px}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-  .kpi{background:var(--card);border-radius:14px;padding:16px 16px 14px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;transition:.15s;position:relative;overflow:hidden}
-  .kpi:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,107,63,.14)}
-  .kpi.active{border-color:var(--mea-green);box-shadow:0 6px 18px rgba(0,107,63,.18)}
+  .kpi{background:var(--card);border-radius:14px;padding:16px 16px 14px;border:1px solid var(--line);box-shadow:0 1px 4px var(--shadow);cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+  .kpi:hover{transform:translateY(-2px);box-shadow:0 6px 16px var(--hover-shadow)}
+  .kpi.active{border-color:var(--mea-green);box-shadow:0 6px 18px var(--active-shadow)}
   .kpi .bar{position:absolute;top:0;left:0;width:5px;height:100%}
   .kpi .name{font-size:13px;color:var(--muted);font-weight:600;min-height:34px}
   .kpi .num{display:flex;align-items:baseline;gap:6px;margin-top:8px}
   .kpi .actual{font-size:30px;font-weight:800}
   .kpi .target{font-size:13px;color:var(--muted)}
-  .kpi .track{height:8px;border-radius:6px;background:#eef2f0;margin-top:10px;overflow:hidden;position:relative}
+  .kpi .track{height:8px;border-radius:6px;background:var(--card-alt);margin-top:10px;overflow:hidden;position:relative}
   .kpi .fill{height:100%;border-radius:6px}
   .kpi .tmark{position:absolute;top:-2px;width:2px;height:12px;background:var(--mea-gold-d)}
   .kpi .meta{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px}
   .chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;color:#fff}
   .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:18px}
-  .panel{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,0,0,.04);padding:18px}
+  .panel{background:var(--card);border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 4px var(--shadow);padding:18px}
   .panel h2{font-size:15px;color:var(--mea-green-d);margin-bottom:4px;display:flex;align-items:center;gap:8px}
   .panel h2 .dot{width:9px;height:9px;border-radius:3px;background:var(--mea-gold)}
   .panel .desc{font-size:12px;color:var(--muted);margin-bottom:12px}
@@ -47,11 +63,11 @@
   table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
   thead th{position:sticky;top:0;background:var(--mea-green);color:#fff;font-weight:600;padding:10px 12px;text-align:left;z-index:2;font-size:12.5px}
   tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-  tbody tr:nth-child(even){background:#fafcfb}
+  tbody tr:nth-child(even){background:var(--card-alt)}
   tbody tr:hover{background:var(--mea-green-l)}
   td.center{text-align:center;white-space:nowrap}
   .grp{background:var(--mea-green-l)!important;font-weight:700;color:var(--mea-green-d)}
-  .mini{height:7px;border-radius:5px;background:#eef2f0;overflow:hidden;min-width:90px}
+  .mini{height:7px;border-radius:5px;background:var(--card-alt);overflow:hidden;min-width:90px}
   .mini i{display:block;height:100%}
   .stat{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;color:#fff}
   .w{font-size:11px;color:var(--muted)}
@@ -62,38 +78,46 @@
   .actrow{cursor:pointer}
   .actrow .more{font-size:11px;color:var(--mea-gold-d);font-weight:600;white-space:nowrap;opacity:.75}
   .actrow:hover .more{opacity:1;text-decoration:underline}
-  .modal{display:none;position:fixed;inset:0;background:rgba(20,35,28,.55);z-index:100;align-items:center;justify-content:center;padding:20px}
+  .modal{display:none;position:fixed;inset:0;background:var(--overlay);z-index:100;align-items:center;justify-content:center;padding:20px}
   .modal.show{display:flex}
-  .mbox{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:86vh;overflow:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .mbox{background:var(--card);border-radius:16px;max-width:760px;width:100%;max-height:86vh;overflow:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.3)}
   .mclose{position:absolute;top:14px;right:14px;border:none;background:var(--mea-green-l);color:var(--mea-green-d);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:14px;font-weight:700;z-index:2}
   .mclose:hover{background:var(--mea-green);color:#fff}
   .mhead{background:linear-gradient(120deg,var(--mea-green-d),var(--mea-green));color:#fff;padding:22px 24px 18px;border-radius:16px 16px 0 0}
   .mtag{font-size:12px;font-weight:700;color:var(--mea-gold);letter-spacing:.5px}
   .mhead h3{font-size:17px;margin:6px 0 8px;line-height:1.4}
-  .msub{font-size:12.5px;color:#d4e7dd}
+  .msub{font-size:12.5px;color:var(--header-sub)}
   .mtblwrap{padding:18px 24px}
   .mtbl{width:100%;border-collapse:collapse;font-size:13px}
   .mtbl thead th{background:var(--mea-green-l);color:var(--mea-green-d);padding:9px 10px;text-align:left;font-size:12px;border-bottom:2px solid var(--mea-green)}
   .mtbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
   .mtbl .mcell{font-weight:700;color:var(--mea-green-d);white-space:nowrap}
   .mtbl .ncell{color:var(--ink);line-height:1.5}
-  .mtbl .ncell .empty{color:#b3bfba;font-style:italic;font-size:12px}
-  .mtbl .curm{background:#f7efd8}
+  .mtbl .ncell .empty{color:var(--empty-ink);font-style:italic;font-size:12px}
+  .mtbl .curm{background:var(--curm-bg)}
   .mtbl .curm .mcell{color:var(--mea-gold-d)}
   .mtbl .future{opacity:.45}
   .dotst{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
   .mfoot{font-size:11.5px;color:var(--muted);padding:4px 24px 22px;line-height:1.6}
-  .reportbody{white-space:pre-wrap;font-size:13px;color:var(--ink);line-height:1.65;background:#fafcfb;border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:130px}
-  .reportbody .empty{color:#b3bfba;font-style:italic}
+  .reportbody{white-space:pre-wrap;font-size:13px;color:var(--ink);line-height:1.65;background:var(--card-alt);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-height:130px}
+  .reportbody .empty{color:var(--empty-ink);font-style:italic}
   .latelist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:0;padding:0}
   .latelist li{padding:9px 12px;border-radius:8px;border-left:4px solid;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
-  .latelist li.lt-warn{border-color:var(--warn);background:#fdf6e9}
-  .latelist li.lt-bad{border-color:var(--bad);background:#fbeceb}
+  .latelist li.lt-warn{border-color:var(--warn);background:var(--warn-bg)}
+  .latelist li.lt-bad{border-color:var(--bad);background:var(--bad-bg)}
   .lt-name{font-weight:700;font-size:13px;color:var(--ink)}
   .lt-sub{color:var(--muted);font-weight:400;font-size:11px}
   .lt-meta{font-size:12px;color:var(--muted);white-space:nowrap}
   .lt-meta b{color:var(--bad)}
   .lateempty{padding:14px;text-align:center;color:var(--ok);font-size:13px;background:var(--mea-green-l);border-radius:8px;font-weight:600}
+  .theme-switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+  .ts-txt{font-size:12px;color:var(--header-soft)}
+  .theme-switch input[type="checkbox"]{position:absolute;width:36px;height:20px;opacity:0;margin:0;cursor:pointer}
+  .ts-track{width:36px;height:20px;border-radius:20px;background:rgba(255,255,255,.28);position:relative;flex:none;transition:background .2s ease}
+  .ts-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s ease;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .theme-switch input:checked ~ .ts-track{background:var(--mea-gold)}
+  .theme-switch input:checked ~ .ts-track .ts-thumb{left:18px}
+  .theme-switch input:focus-visible ~ .ts-track{outline:2px solid #fff;outline-offset:2px}
   .loading{text-align:center;padding:60px;color:var(--muted)}
   .err{text-align:center;padding:40px;color:var(--bad);font-size:14px}
   footer{text-align:center;color:var(--muted);font-size:11.5px;padding:18px}
@@ -109,7 +133,12 @@
       <div class="sub">การไฟฟ้านครหลวง · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) · รองผู้ว่าการยุทธศาสตร์องค์กรและความยั่งยืน</div>
     </div>
     <div class="asof">
-      ข้อมูล ณ เดือน<br><select id="monthSel"></select>
+      <label class="theme-switch">
+        <span class="ts-txt">โหมดมืด</span>
+        <input type="checkbox" role="switch" id="themeSwitch" aria-label="สลับโหมดมืด">
+        <span class="ts-track"><span class="ts-thumb"></span></span>
+      </label>
+      <div style="margin-top:8px">ข้อมูล ณ เดือน<br><select id="monthSel"></select></div>
       <div id="updated" style="margin-top:6px;font-size:11px"></div>
     </div>
   </div>
@@ -123,11 +152,23 @@
 
 <script>
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-const C={ok:'#2e9e5b',warn:'#e0a526',bad:'#d9534f',idle:'#9aa6a1'};
+// สีสถานะ ok/warn/bad/idle — ปรับความสว่างต่างกันระหว่างโหมดสว่าง/มืด เพื่อให้อ่านง่ายบนพื้นเข้ม
+const C_LIGHT={ok:'#2e9e5b',warn:'#e0a526',bad:'#d9534f',idle:'#9aa6a1'};
+const C_DARK ={ok:'#5fcb7c',warn:'#f0b429',bad:'#f16b60',idle:'#7a6f62'};
+const C={...C_LIGHT};
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark';}
+function applyStatusColors(){Object.assign(C, isDark()?C_DARK:C_LIGHT);}
+// สีเส้น/พื้นที่กราฟ (เป้าหมาย=ทอง/ส้ม, ผลจริง=เขียว) ปรับตามธีม
+function chartColors(){
+  return isDark()
+    ?{gold:'#e8772e',goldFill:'rgba(232,119,46,.20)',green:'#5fcb7c',greenFill:'rgba(95,203,124,.16)'}
+    :{gold:'#c9a13b',goldFill:'rgba(201,161,59,.12)',green:'#006b3f',greenFill:'rgba(0,107,63,.10)'};
+}
 // ปลั๊กอินจุดกระพริบ (pulse) ที่จุดเดือนปัจจุบัน บนกราฟเส้นเป้าหมาย/ผลจริง
 const pulsePlugin={id:'pulse',afterDatasetsDraw(chart){
   if(chart.canvas.id!=='trend'||typeof curMonth!=='number')return;
-  const ctx=chart.ctx,phase=(Date.now()%1300)/1300,cols=['#c9a13b','#006b3f'];
+  const cc=chartColors();
+  const ctx=chart.ctx,phase=(Date.now()%1300)/1300,cols=[cc.gold,cc.green];
   [0,1].forEach(di=>{
     const meta=chart.getDatasetMeta(di),pt=meta&&meta.data&&meta.data[curMonth];
     if(!pt||isNaN(pt.x)||isNaN(pt.y))return;
@@ -234,9 +275,10 @@ function renderTrend(){
   const p=DATA.plans[curPlan];
   const actCum=MONTHS.map((_,i)=>i<=curMonth?planCumActual(p,i):null);
   document.getElementById('trendDesc').textContent=(p.full||p.name)+" — เส้นทอง=เป้าหมายสะสม, เส้นเขียว=ผลจริงสะสม (ถึงเดือน "+MONTHS[curMonth]+")";
+  const cc=chartColors();
   const data={labels:MONTHS,datasets:[
-    {label:'เป้าหมายสะสม (%)',data:p.cum,borderColor:'#c9a13b',backgroundColor:'rgba(201,161,59,.12)',borderWidth:2,tension:.3,fill:true,pointRadius:3},
-    {label:'ผลจริงสะสม (%)',data:actCum,borderColor:'#006b3f',backgroundColor:'rgba(0,107,63,.10)',borderWidth:2.5,tension:.3,fill:true,pointRadius:3,spanGaps:false}]};
+    {label:'เป้าหมายสะสม (%)',data:p.cum,borderColor:cc.gold,backgroundColor:cc.goldFill,borderWidth:2,tension:.3,fill:true,pointRadius:3},
+    {label:'ผลจริงสะสม (%)',data:actCum,borderColor:cc.green,backgroundColor:cc.greenFill,borderWidth:2.5,tension:.3,fill:true,pointRadius:3,spanGaps:false}]};
   if(trendChart){trendChart.data=data;trendChart.update();}
   else{
     trendChart=new Chart(document.getElementById('trend'),{type:'line',data,plugins:[pulsePlugin],options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{position:'bottom'}}}});
@@ -247,9 +289,10 @@ function renderCompare(){
   const labels=Object.values(DATA.plans).map(p=>p.name);
   const tgt=Object.values(DATA.plans).map(p=>p.cum[curMonth]);
   const act=Object.values(DATA.plans).map(p=>planCumActual(p,curMonth));
+  const cc=chartColors();
   const data={labels,datasets:[
-    {label:'เป้าหมาย',data:tgt,backgroundColor:'#c9a13b',borderRadius:5},
-    {label:'ผลจริง',data:act,backgroundColor:'#006b3f',borderRadius:5}]};
+    {label:'เป้าหมาย',data:tgt,backgroundColor:cc.gold,borderRadius:5},
+    {label:'ผลจริง',data:act,backgroundColor:cc.green,borderRadius:5}]};
   if(compChart){compChart.data=data;compChart.update();}
   else compChart=new Chart(document.getElementById('compare'),{type:'bar',data,options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}},plugins:{legend:{display:false}}}});
 }
@@ -381,6 +424,31 @@ function renderReport(){
   b.innerHTML=txt?txt.replace(/</g,'&lt;').replace(/\n/g,'<br>'):'<span class="empty">— ยังไม่มีสรุปรายงานสำหรับเดือนนี้ —</span>';
 }
 function renderAll(){renderKpis();renderTrend();renderCompare();renderLate();renderReport();renderTable();}
+
+/* ---- Dark mode: สลับธีมด้วยสวิตช์ในหัว Dashboard ---- */
+function applyChartDefaults(){
+  const dark=isDark();
+  Chart.defaults.color=dark?'#c9b8a4':'#5e6f68';
+  Chart.defaults.borderColor=dark?'#3a2e24':'#e3eae6';
+}
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  try{localStorage.setItem('cg-theme',theme);}catch(e){}
+  const sw=document.getElementById('themeSwitch');
+  if(sw)sw.checked=(theme==='dark');
+  applyStatusColors();
+  applyChartDefaults();
+  if(DATA&&curPlan)renderAll();
+}
+function initTheme(){
+  let saved=null; try{saved=localStorage.getItem('cg-theme');}catch(e){}
+  const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(saved||(prefersDark?'dark':'light'));
+  const sw=document.getElementById('themeSwitch');
+  if(sw)sw.addEventListener('change',e=>setTheme(e.target.checked?'dark':'light'));
+}
+initTheme();
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 function boot(){
