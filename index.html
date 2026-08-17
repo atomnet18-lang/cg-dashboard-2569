@@ -110,7 +110,6 @@
   .barpct{font-size:16px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
   .legend span{display:inline-flex;align-items:center;gap:5px}
   .legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
-  .note{font-size:11.5px;color:var(--muted);margin-top:14px;padding:10px 12px;background:var(--mea-green-l);border-radius:8px;border-left:3px solid var(--mea-gold)}
   .actrow{cursor:pointer}
   .actrow .more{font-size:11px;color:var(--accent-text);font-weight:600;white-space:nowrap;opacity:.75}
   .actrow:hover .more{opacity:1;text-decoration:underline}
@@ -206,7 +205,7 @@
   <div class="loading">⏳ กำลังโหลดข้อมูลจาก data.json ...</div>
 </div>
 
-<footer>จัดทำโดยงานด้าน CG · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) การไฟฟ้านครหลวง — ข้อมูลปรับปรุงผ่าน data.json</footer>
+<footer>จัดทำโดยงานด้าน CG · ฝ่ายบริหารความเสี่ยงองค์กร (ฝบส.) การไฟฟ้านครหลวง</footer>
 
 <script>
 const MONTHS=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -281,7 +280,6 @@ const APP_HTML=`
       <span><i style="background:var(--bad)"></i> ต่ำกว่าเป้า (ห่าง &gt;15%)</span>
       <span><i style="background:var(--idle)"></i> ยังไม่ถึงกำหนด</span>
     </div>
-    <div class="note">ข้อมูลแสดงผลอย่างเดียว (read-only) — การปรับปรุงผลการดำเนินงานทำผ่านไฟล์ Excel บน Microsoft 365 ของแต่ละฝ่าย แล้วแปลงเป็น data.json เผยแพร่ผ่าน GitHub Pages · การจัดการความเสี่ยง: หากระดับความเสี่ยงหลังการควบคุมอยู่ในระดับสูง/สูงมาก ให้ดำเนินการจัดการความเสี่ยงเพิ่มเติม</div>
   </div>`;
 
 function planCumActual(p,mi){
